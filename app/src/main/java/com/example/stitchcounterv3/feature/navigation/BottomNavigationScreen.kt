@@ -18,13 +18,11 @@ import com.example.stitchcounterv3.feature.destinations.SettingsScreenDestinatio
 import com.ramcosta.composedestinations.DestinationsNavHost
 import com.example.stitchcounterv3.feature.NavGraphs
 import com.ramcosta.composedestinations.annotation.Destination
-import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 
 @RootNavGraph(start = true)
 @Destination
 @Composable
 fun BottomNavigationScreen(
-    navigator: DestinationsNavigator,
     viewModel: BottomNavigationViewModel = hiltViewModel()
 ) {
     val selectedTab by viewModel.selectedTab.collectAsState()
@@ -57,7 +55,7 @@ private fun BottomNavigationBar(
     onTabSelected: (BottomNavTab) -> Unit
 ) {
     NavigationBar {
-        BottomNavTab.values().forEach { tab ->
+        BottomNavTab.entries.forEach { tab ->
             NavigationBarItem(
                 selected = selectedTab == tab,
                 onClick = { onTabSelected(tab) },

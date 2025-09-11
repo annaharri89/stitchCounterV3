@@ -22,8 +22,6 @@ import com.example.stitchcounterv3.feature.navigation.BottomNavGraph
 import com.example.stitchcounterv3.ui.theme.StitchCounterV3Theme
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
-import com.ramcosta.composedestinations.navigation.navigate
-import com.ramcosta.composedestinations.navigation.popBackStack
 
 
 @BottomNavGraph(start = true)
@@ -60,16 +58,10 @@ fun MainScreen(
         ) {
             Text(stringResource(id = R.string.app_name), style = MaterialTheme.typography.headlineMedium)
             Button(onClick = { viewModel.navigateToSingleCounter() }) {
-                Text("New Basic Counter")
+                Text("Single Tracker")
             }
             Button(onClick = { viewModel.navigateToDoubleCounter() }) {
-                Text("New Advanced Counter")
-            }
-            Button(onClick = { viewModel.navigateToLibrary() }) { 
-                Text("Library") 
-            }
-            Button(onClick = { viewModel.navigateToSettings() }) { 
-                Text("Settings") 
+                Text("Double Tracker")
             }
         }
     }
@@ -95,8 +87,6 @@ private fun MainScreenPreview() {
                 Button(onClick = {}) {
                     Text("Advanced Counter - 2 counters")
                 }
-                Button(onClick = {}) { Text("Library") }
-                Button(onClick = {}) { Text("Settings") }
             }
         }
     }
