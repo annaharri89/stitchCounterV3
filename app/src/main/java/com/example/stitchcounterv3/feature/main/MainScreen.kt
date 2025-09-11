@@ -18,7 +18,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.stitchcounterv3.R
 import com.example.stitchcounterv3.domain.model.NavigationEvent
-import com.example.stitchcounterv3.feature.navigation.RootNavGraph
+import com.example.stitchcounterv3.feature.navigation.BottomNavGraph
 import com.example.stitchcounterv3.ui.theme.StitchCounterV3Theme
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
@@ -26,7 +26,7 @@ import com.ramcosta.composedestinations.navigation.navigate
 import com.ramcosta.composedestinations.navigation.popBackStack
 
 
-@RootNavGraph(start = true)
+@BottomNavGraph(start = true)
 @Destination
 @Composable
 fun MainScreen(

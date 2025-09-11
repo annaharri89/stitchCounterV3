@@ -8,8 +8,10 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import com.example.stitchcounterv3.feature.NavGraphs
+import com.example.stitchcounterv3.feature.navigation.BottomNavigationScreen
+import com.example.stitchcounterv3.feature.destinations.BottomNavigationScreenDestination
 import com.ramcosta.composedestinations.DestinationsNavHost
+import com.example.stitchcounterv3.feature.NavGraphs
 import com.example.stitchcounterv3.ui.theme.StitchCounterV3Theme
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -33,6 +35,6 @@ class MainActivity : ComponentActivity() {
 private fun AppContent() {
     DestinationsNavHost(
         navGraph = NavGraphs.root,
-        startRoute = NavGraphs.root.startRoute
+        startRoute = BottomNavigationScreenDestination
     )
 }
