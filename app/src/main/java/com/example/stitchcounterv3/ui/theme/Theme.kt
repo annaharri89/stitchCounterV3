@@ -9,50 +9,98 @@ import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
 
-private val DarkColorScheme = darkColorScheme(
-    primary = Purple80,
-    secondary = PurpleGrey80,
-    tertiary = Pink80
+// Resources - Theme Colors
+fun seaCottageLightColors() = lightColorScheme(
+    primary = SeaCottageMint,
+    secondary = SeaCottageSurf,
+    tertiary = SeaCottageWhaleLight,
+    onTertiary = SeaCottageWhaleDark,
+    //accentDark = SeaCottageWhaleDark,
+    //accentLight = SeaCottageWhaleLight,
+    background = Color.White.copy(alpha = 0.1f), // Very subtle white overlay
+    surface = Color.White.copy(alpha = 0.05f),  // Even more subtle for surfaces
+    onPrimary = Color.Black,
+    //onSecondary = textSecondaryLight,
 )
 
-private val LightColorScheme = lightColorScheme(
-    primary = Purple40,
-    secondary = PurpleGrey40,
-    tertiary = Pink40
+/*
+fun seaCottageDarkColors() = darkColorScheme(
+    primary = SeaCottageMint,
+    secondary = SeaCottageSurf,
+    accentDark = SeaCottageWhaleDark,
+    accentLight = SeaCottageWhaleLight,
+    background = grey_191919,//todo stitchCounterV2
+    surface = grey_262527,//todo stitchCounterV2
+    onPrimary = textPrimaryDark,
+    onSecondary = textSecondaryDark,
+)*/
 
-    /* Other default colors to override
-    background = Color(0xFFFFFBFE),
-    surface = Color(0xFFFFFBFE),
+/* TODO: implement the other theme color
+fun retroSummerLightColors() = lightColorScheme(
+    primary = RetroSummerOrangeLight,
+    secondary = RetroSummerOrangeDark,
+    accentDark = RetroSummerCactus,
+    accentLight = RetroSummerSun,
+    background = Color.White,
+    surface = Color.White,
+    onPrimary = grey_272525,
+    onSecondary = grey_444444,
+    cGrey = grey_444444,
+)
+
+fun retroSummerDarkColors() = darkColorScheme(
+    primary = RetroSummerOrangeLight,
+    secondary = retroSummerOrangeDark,
+    accentDark = retroSummerCactus,
+    accentLight = retroSummerSun,
+    background = grey_191919,
+    surface = grey_262527,
     onPrimary = Color.White,
-    onSecondary = Color.White,
-    onTertiary = Color.White,
-    onBackground = Color(0xFF1C1B1F),
-    onSurface = Color(0xFF1C1B1F),
-    */
+    onSecondary = grey_b0b0b0,
+    cGrey = grey_444444,
 )
+*/
 
 @Composable
 fun StitchCounterV3Theme(
     darkTheme: Boolean = isSystemInDarkTheme(),
     // Dynamic color is available on Android 12+
-    dynamicColor: Boolean = true,
     content: @Composable () -> Unit
 ) {
     val colorScheme = when {
-        dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
-            val context = LocalContext.current
-            if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
-        }
-
-        darkTheme -> DarkColorScheme
-        else -> LightColorScheme
+        darkTheme -> seaCottageLightColors()
+        else -> seaCottageLightColors()
     }
 
     MaterialTheme(
         colorScheme = colorScheme,
         typography = Typography,
         content = content
+        /*{
+
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(
+                        brush = Brush.verticalGradient(
+                            colors = listOf(
+                                colorScheme.secondary,
+                                colorScheme.tertiary,
+                                colorScheme.primary,
+                            )
+                        )
+                    )
+            ) {
+                content()
+            }
+        }*/
     )
 }

@@ -67,7 +67,16 @@ private fun BottomNavigationBar(
                 },
                 label = {
                     Text(tab.title)
-                }
+                },
+                colors = NavigationBarItemColors(
+                    selectedIconColor = MaterialTheme.colorScheme.secondary,
+                    selectedTextColor = MaterialTheme.colorScheme.secondary,
+                    unselectedIconColor = Color.Gray,
+                    unselectedTextColor = Color.Gray,
+                    selectedIndicatorColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f),
+                    disabledIconColor = Color.Gray,
+                    disabledTextColor = Color.Gray
+                )
             )
         }
     }
