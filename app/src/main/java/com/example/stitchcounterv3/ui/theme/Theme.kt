@@ -9,45 +9,78 @@ import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
+import com.example.stitchcounterv3.domain.model.AppTheme
+import com.example.stitchcounterv3.feature.theme.ThemeManager
 
-private val DarkColorScheme = darkColorScheme(
+// Resources - Theme Colors
+fun seaCottageLightColors() = lightColorScheme(
+    primary = SeaCottageSurf40,
+    secondary = SeaCottageMint40,
+    tertiary = SeaCottageWhaleLight40,
+    primaryContainer = SeaCottagePrimaryContainer40,
+)
+
+
+fun seaCottageDarkColors() = darkColorScheme(
+    primary = SeaCottageSurf80,
+    secondary = SeaCottageMint80,
+    tertiary = SeaCottageWhaleLight80,
+    primaryContainer = SeaCottagePrimaryContainer80,
+)
+
+fun retroSummerLightColors() = lightColorScheme(
+    primary =  RetroSummerCactus40 ,
+    secondary = RetroSummerSun40,
+    tertiary = RetroSummerOrangeLight40,
+    onTertiary = RetroSummerSun40,
+    primaryContainer = RetroSummerPrimaryContainer40,
+)
+
+fun retroSummerDarkColors() = darkColorScheme(
+    primary = RetroSummerCactus80,
+    secondary = RetroSummerSun80,
+    tertiary = RetroSummerOrangeLight80,
+    primaryContainer = RetroSummerPrimaryContainer80,
+)
+
+fun purpleLightColors() = lightColorScheme(
+    primary =  Purple40 ,
+    secondary = PurpleGrey40,
+    tertiary = Pink40,
+    primaryContainer = PurplePrimaryContainer40,
+)
+
+fun purpleDarkColors() = darkColorScheme(
     primary = Purple80,
     secondary = PurpleGrey80,
-    tertiary = Pink80
+    tertiary = Pink80,
+    primaryContainer = PurplePrimaryContainer80,
 )
 
-private val LightColorScheme = lightColorScheme(
-    primary = Purple40,
-    secondary = PurpleGrey40,
-    tertiary = Pink40
 
-    /* Other default colors to override
-    background = Color(0xFFFFFBFE),
-    surface = Color(0xFFFFFBFE),
-    onPrimary = Color.White,
-    onSecondary = Color.White,
-    onTertiary = Color.White,
-    onBackground = Color(0xFF1C1B1F),
-    onSurface = Color(0xFF1C1B1F),
-    */
-)
-
+/**
+ * Main theme composable that applies the selected color scheme app-wide.
+ * 
+ * Flow: ThemeViewModel observes DataStore → emits selected theme → 
+ * ThemeManager maps theme to ColorScheme → MaterialTheme applies colors
+ */
 @Composable
 fun StitchCounterV3Theme(
     darkTheme: Boolean = isSystemInDarkTheme(),
-    // Dynamic color is available on Android 12+
-    dynamicColor: Boolean = true,
+    theme: AppTheme = AppTheme.SEA_COTTAGE,
     content: @Composable () -> Unit
 ) {
+    val themeManager = ThemeManager()
     val colorScheme = when {
-        dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
-            val context = LocalContext.current
-            if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
-        }
-
-        darkTheme -> DarkColorScheme
-        else -> LightColorScheme
+        darkTheme -> themeManager.getDarkColorScheme(theme)
+        else -> themeManager.getLightColorScheme(theme)
     }
 
     MaterialTheme(
