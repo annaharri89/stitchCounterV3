@@ -23,6 +23,9 @@ import android.content.res.Configuration
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.navigation.compose.rememberNavController
+import androidx.navigation.NavHostController
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -43,17 +46,22 @@ fun BottomNavigationScreen(
     val configuration = LocalConfiguration.current
     val isCompact = configuration.screenWidthDp < 600 // 600dp is the breakpoint for tablets
     
+    // Single navigation controller that persists across orientation changes
+    val navController = rememberNavController()
+    
     if (isCompact) {
         // Use bottom navigation for compact screens (phones in portrait)
         BottomNavigationLayout(
             selectedTab = selectedTab,
-            onTabSelected = viewModel::selectTab
+            onTabSelected = viewModel::selectTab,
+            navController = navController
         )
     } else {
         // Use navigation rail for expanded screens (tablets, phones in landscape)
         NavigationRailLayout(
             selectedTab = selectedTab,
-            onTabSelected = viewModel::selectTab
+            onTabSelected = viewModel::selectTab,
+            navController = navController
         )
     }
 }
@@ -61,7 +69,8 @@ fun BottomNavigationScreen(
 @Composable
 private fun BottomNavigationLayout(
     selectedTab: BottomNavTab,
-    onTabSelected: (BottomNavTab) -> Unit
+    onTabSelected: (BottomNavTab) -> Unit,
+    navController: NavHostController
 ) {
     Scaffold(
         bottomBar = {
@@ -83,11 +92,7 @@ private fun BottomNavigationLayout(
     ) { paddingValues ->
         DestinationsNavHost(
             navGraph = NavGraphs.bottom,
-            startRoute = when (selectedTab) {
-                BottomNavTab.HOME -> MainScreenDestination
-                BottomNavTab.LIBRARY -> LibraryScreenDestination
-                BottomNavTab.SETTINGS -> SettingsScreenDestination
-            },
+            navController = navController,
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
@@ -98,7 +103,8 @@ private fun BottomNavigationLayout(
 @Composable
 private fun NavigationRailLayout(
     selectedTab: BottomNavTab,
-    onTabSelected: (BottomNavTab) -> Unit
+    onTabSelected: (BottomNavTab) -> Unit,
+    navController: NavHostController
 ) {
     Scaffold(
         modifier = Modifier.fillMaxSize()
@@ -127,11 +133,7 @@ private fun NavigationRailLayout(
             // Content area
             DestinationsNavHost(
                 navGraph = NavGraphs.bottom,
-                startRoute = when (selectedTab) {
-                    BottomNavTab.HOME -> MainScreenDestination
-                    BottomNavTab.LIBRARY -> LibraryScreenDestination
-                    BottomNavTab.SETTINGS -> SettingsScreenDestination
-                },
+                navController = navController,
                 modifier = Modifier
                     .fillMaxSize()
                     .weight(1f)
