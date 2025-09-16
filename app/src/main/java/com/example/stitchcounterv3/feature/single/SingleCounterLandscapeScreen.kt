@@ -22,6 +22,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.stitchcounterv3.domain.model.AdjustmentAmount
 import com.example.stitchcounterv3.ui.theme.StitchCounterV3Theme
 
 @Composable
@@ -78,17 +79,17 @@ fun SingleCounterLandScapeScreen(
             Spacer(modifier = Modifier.weight(1f))
             Button(
                 colors = ButtonDefaults.buttonColors().copy(containerColor = MaterialTheme.colorScheme.secondary),
-                onClick = { viewModel.changeAdjustment(1) }) {
+                onClick = { viewModel.changeAdjustment(AdjustmentAmount.ONE) }) {
                 Text("+1")
             }
             Button(
                 colors = ButtonDefaults.buttonColors().copy(containerColor = MaterialTheme.colorScheme.tertiary),
-                onClick = { viewModel.changeAdjustment(5) }) {
+                onClick = { viewModel.changeAdjustment(AdjustmentAmount.FIVE) }) {
                 Text("+5")
             }
             Button(
                 colors = ButtonDefaults.buttonColors().copy(containerColor = MaterialTheme.colorScheme.error),
-                onClick = { viewModel.changeAdjustment(10) }) {
+                onClick = { viewModel.changeAdjustment(AdjustmentAmount.TEN) }) {
                 Text("+10")
             }
             Spacer(modifier = Modifier.weight(1f))

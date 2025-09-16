@@ -2,6 +2,7 @@ package com.example.stitchcounterv3.feature.single
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.stitchcounterv3.domain.model.AdjustmentAmount
 import com.example.stitchcounterv3.domain.model.NavigationEvent
 import com.example.stitchcounterv3.domain.model.Project
 import com.example.stitchcounterv3.domain.model.ProjectType
@@ -15,13 +16,14 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 data class SingleCounterUiState(
     val id: Int = 0,
     val title: String = "",
     val count: Int = 0,
-    val adjustment: Int = 1,
+    val adjustment: AdjustmentAmount = AdjustmentAmount.ONE,
     val isLoading: Boolean = false,
 )
 
@@ -37,43 +39,45 @@ open class SingleCounterViewModel @Inject constructor(
     private val _navigationEvents = Channel<NavigationEvent>(Channel.UNLIMITED)
     val navigationEvents: Flow<NavigationEvent> = _navigationEvents.receiveAsFlow()
 
-    fun load(projectId: Int?) {
+    fun loadProject(projectId: Int?) {
         viewModelScope.launch {
             if (projectId == null || projectId == 0) return@launch
-            _uiState.value = _uiState.value.copy(isLoading = true)
+            _uiState.update { currentState -> currentState.copy(isLoading = true) }
             val project = getProject(projectId)
             if (project != null) {
-                _uiState.value = _uiState.value.copy(
-                    id = project.id,
-                    title = project.title,
-                    count = project.stitchCounterNumber,
-                    adjustment = project.stitchAdjustment,
-                    isLoading = false
-                )
+                _uiState.update { currentState ->
+                    currentState.copy(
+                        id = project.id,
+                        title = project.title,
+                        count = project.stitchCounterNumber,
+                        adjustment = AdjustmentAmount.valueOf(project.stitchAdjustment.toString()),
+                        isLoading = false
+                    )
+                }
             } else {
-                _uiState.value = _uiState.value.copy(isLoading = false)
+                _uiState.update { currentState -> currentState.copy(isLoading = false) }
             }
         }
     }
 
     fun setTitle(title: String) {
-        _uiState.value = _uiState.value.copy(title = title)
+        _uiState.update { currentState -> currentState.copy(title = title) }
     }
 
-    fun changeAdjustment(value: Int) {
-        _uiState.value = _uiState.value.copy(adjustment = value)
+    fun changeAdjustment(value: AdjustmentAmount) {
+        _uiState.update { currentState -> currentState.copy(adjustment = value) }
     }
 
     fun increment() {
-        _uiState.value = _uiState.value.copy(count = _uiState.value.count + _uiState.value.adjustment)
+        _uiState.update { currentState -> currentState.copy(count = currentState.count + currentState.adjustment.adjustmentAmount) }
     }
 
     fun decrement() {
-        _uiState.value = _uiState.value.copy(count = (_uiState.value.count - _uiState.value.adjustment).coerceAtLeast(0))
+        _uiState.update { currentState -> currentState.copy(count = (currentState.count - currentState.adjustment.adjustmentAmount).coerceAtLeast(0)) }
     }
 
     fun reset() {
-        _uiState.value = _uiState.value.copy(count = 0)
+        _uiState.update { currentState -> currentState.copy(count = 0) }
     }
 
     fun save() {
@@ -84,31 +88,20 @@ open class SingleCounterViewModel @Inject constructor(
                 type = ProjectType.SINGLE,
                 title = state.title,
                 stitchCounterNumber = state.count,
-                stitchAdjustment = state.adjustment,
+                stitchAdjustment = state.adjustment.adjustmentAmount,
             )
             val newId = upsertProject(project).toInt()
             if (state.id == 0 && newId > 0) {
-                _uiState.value = _uiState.value.copy(id = newId)
+                _uiState.update { currentState -> currentState.copy(id = newId) }
             }
         }
     }
     
     // Navigate back to main screen after saving
-    fun saveAndGoBack() {
+    fun saveAndGoBack() {//todo
         save()
         viewModelScope.launch {
             _navigationEvents.send(NavigationEvent.PopBackStack)
-        }
-    }
-    
-    // Navigate to library screen
-    fun goToLibrary() {
-        viewModelScope.launch {
-            _navigationEvents.send(
-                NavigationEvent.NavigateToScreen(
-                    com.example.stitchcounterv3.feature.destinations.LibraryScreenDestination()
-                )
-            )
         }
     }
 }

@@ -17,13 +17,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.example.stitchcounterv3.domain.model.AdjustmentAmount
 import com.example.stitchcounterv3.domain.model.NavigationEvent
 import com.example.stitchcounterv3.feature.navigation.BottomNavGraph
-import com.example.stitchcounterv3.ui.theme.StitchCounterV3Theme
+import com.example.stitchcounterv3.feature.sharedComposables.AdjustmentButtons
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
-import com.ramcosta.composedestinations.navigation.navigate
-import com.ramcosta.composedestinations.navigation.popBackStack
 
 @BottomNavGraph
 @Destination
@@ -33,7 +32,7 @@ fun DoubleCounterScreen(
     viewModel: DoubleCounterViewModel = hiltViewModel(),
     navigator: DestinationsNavigator
 ) {
-    LaunchedEffect(projectId) { viewModel.load(projectId) }
+    LaunchedEffect(projectId) { viewModel.loadProject(projectId) }
     
     // Collect navigation events and handle them
     LaunchedEffect(viewModel) {
@@ -64,11 +63,9 @@ fun DoubleCounterScreen(
                 Button(onClick = viewModel::incStitch) { Text("+") }
                 Button(onClick = viewModel::resetStitch) { Text("Reset") }
             }
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                Button(onClick = { viewModel.changeStitchAdjustment(1) }) { Text("+1") }
-                Button(onClick = { viewModel.changeStitchAdjustment(5) }) { Text("+5") }
-                Button(onClick = { viewModel.changeStitchAdjustment(10) }) { Text("+10") }
-            }
+            AdjustmentButtons(
+                onAdjustmentClick = viewModel::changeStitchAdjustment
+            )
 
             Text("Rows: ${state.rowCount}")
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -76,11 +73,9 @@ fun DoubleCounterScreen(
                 Button(onClick = viewModel::incRow) { Text("+") }
                 Button(onClick = viewModel::resetRow) { Text("Reset") }
             }
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                Button(onClick = { viewModel.changeRowAdjustment(1) }) { Text("+1") }
-                Button(onClick = { viewModel.changeRowAdjustment(5) }) { Text("+5") }
-                Button(onClick = { viewModel.changeRowAdjustment(10) }) { Text("+10") }
-            }
+            AdjustmentButtons(
+                onAdjustmentClick = viewModel::changeRowAdjustment
+            )
 
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 Button(onClick = viewModel::save) { Text("Save") }
