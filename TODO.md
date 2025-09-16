@@ -6,17 +6,18 @@
 - [ ] Rework the UI for the counters so it's more intuitive
 - [ ] Make it so the double counter UI will never overflow the screen
 - [ ] Make it so the UI is responsive whether the user is in portrait or landscape mode
+- [ ] Allow users to upload pictures of their projects progress
+
 
 ### Library UI
 - [ ] Rework the library UI, make it a grid list and make images show up
-- [ ] Allow users to upload pictures of their projects progress
 
 ## ⚙️ Settings & Configuration
 - [ ] Finish the settings screen
 
 ### Theme & Visual Design
-- [ ] Create a color scheme that the user can change
-- [ ] Get light and dark mode working
+- [x] Create a color scheme that the user can change
+- [x] Get light and dark mode working
 - [ ] Create new app icon
 
 ## 💾 Data Management & Backup

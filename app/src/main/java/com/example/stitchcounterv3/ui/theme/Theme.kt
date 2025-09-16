@@ -16,91 +16,76 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
+import com.example.stitchcounterv3.domain.model.AppTheme
+import com.example.stitchcounterv3.feature.theme.ThemeManager
 
 // Resources - Theme Colors
 fun seaCottageLightColors() = lightColorScheme(
-    primary = SeaCottageMint,
-    secondary = SeaCottageSurf,
-    tertiary = SeaCottageWhaleLight,
-    onTertiary = SeaCottageWhaleDark,
-    //accentDark = SeaCottageWhaleDark,
-    //accentLight = SeaCottageWhaleLight,
-    background = Color.White.copy(alpha = 0.1f), // Very subtle white overlay
-    surface = Color.White.copy(alpha = 0.05f),  // Even more subtle for surfaces
-    onPrimary = Color.Black,
-    //onSecondary = textSecondaryLight,
+    primary = SeaCottageSurf40,
+    secondary = SeaCottageMint40,
+    tertiary = SeaCottageWhaleLight40,
+    primaryContainer = SeaCottagePrimaryContainer40,
 )
 
-/*
-fun seaCottageDarkColors() = darkColorScheme(
-    primary = SeaCottageMint,
-    secondary = SeaCottageSurf,
-    accentDark = SeaCottageWhaleDark,
-    accentLight = SeaCottageWhaleLight,
-    background = grey_191919,//todo stitchCounterV2
-    surface = grey_262527,//todo stitchCounterV2
-    onPrimary = textPrimaryDark,
-    onSecondary = textSecondaryDark,
-)*/
 
-/* TODO: implement the other theme color
+fun seaCottageDarkColors() = darkColorScheme(
+    primary = SeaCottageSurf80,
+    secondary = SeaCottageMint80,
+    tertiary = SeaCottageWhaleLight80,
+    primaryContainer = SeaCottagePrimaryContainer80,
+)
+
 fun retroSummerLightColors() = lightColorScheme(
-    primary = RetroSummerOrangeLight,
-    secondary = RetroSummerOrangeDark,
-    accentDark = RetroSummerCactus,
-    accentLight = RetroSummerSun,
-    background = Color.White,
-    surface = Color.White,
-    onPrimary = grey_272525,
-    onSecondary = grey_444444,
-    cGrey = grey_444444,
+    primary =  RetroSummerCactus40 ,
+    secondary = RetroSummerSun40,
+    tertiary = RetroSummerOrangeLight40,
+    onTertiary = RetroSummerSun40,
+    primaryContainer = RetroSummerPrimaryContainer40,
 )
 
 fun retroSummerDarkColors() = darkColorScheme(
-    primary = RetroSummerOrangeLight,
-    secondary = retroSummerOrangeDark,
-    accentDark = retroSummerCactus,
-    accentLight = retroSummerSun,
-    background = grey_191919,
-    surface = grey_262527,
-    onPrimary = Color.White,
-    onSecondary = grey_b0b0b0,
-    cGrey = grey_444444,
+    primary = RetroSummerCactus80,
+    secondary = RetroSummerSun80,
+    tertiary = RetroSummerOrangeLight80,
+    primaryContainer = RetroSummerPrimaryContainer80,
 )
-*/
 
+fun purpleLightColors() = lightColorScheme(
+    primary =  Purple40 ,
+    secondary = PurpleGrey40,
+    tertiary = Pink40,
+    primaryContainer = PurplePrimaryContainer40,
+)
+
+fun purpleDarkColors() = darkColorScheme(
+    primary = Purple80,
+    secondary = PurpleGrey80,
+    tertiary = Pink80,
+    primaryContainer = PurplePrimaryContainer80,
+)
+
+
+/**
+ * Main theme composable that applies the selected color scheme app-wide.
+ * 
+ * Flow: ThemeViewModel observes DataStore → emits selected theme → 
+ * ThemeManager maps theme to ColorScheme → MaterialTheme applies colors
+ */
 @Composable
 fun StitchCounterV3Theme(
     darkTheme: Boolean = isSystemInDarkTheme(),
-    // Dynamic color is available on Android 12+
+    theme: AppTheme = AppTheme.SEA_COTTAGE,
     content: @Composable () -> Unit
 ) {
+    val themeManager = ThemeManager()
     val colorScheme = when {
-        darkTheme -> seaCottageLightColors()
-        else -> seaCottageLightColors()
+        darkTheme -> themeManager.getDarkColorScheme(theme)
+        else -> themeManager.getLightColorScheme(theme)
     }
 
     MaterialTheme(
         colorScheme = colorScheme,
         typography = Typography,
         content = content
-        /*{
-
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(
-                        brush = Brush.verticalGradient(
-                            colors = listOf(
-                                colorScheme.secondary,
-                                colorScheme.tertiary,
-                                colorScheme.primary,
-                            )
-                        )
-                    )
-            ) {
-                content()
-            }
-        }*/
     )
 }

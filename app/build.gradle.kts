@@ -79,6 +79,9 @@ dependencies {
     implementation(libs.compose.destinations.core)
     implementation(libs.compose.destinations.animations.core)
     ksp(libs.compose.destinations.ksp)
+
+    // DataStore
+    implementation(libs.androidx.datastore.preferences)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
