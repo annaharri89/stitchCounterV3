@@ -58,10 +58,10 @@ fun MainScreen(
         ) {
             Text(stringResource(id = R.string.app_name), style = MaterialTheme.typography.headlineMedium)
             Button(onClick = { viewModel.navigateToSingleCounter() }) {
-                Text("Single Tracker")
+                Text("New Single Tracker")
             }
             Button(onClick = { viewModel.navigateToDoubleCounter() }) {
-                Text("Double Tracker")
+                Text("New Double Tracker")
             }
         }
     }

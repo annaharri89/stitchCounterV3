@@ -25,6 +25,7 @@ fun seaCottageLightColors() = lightColorScheme(
     secondary = SeaCottageMint40,
     tertiary = SeaCottageWhaleLight40,
     primaryContainer = SeaCottagePrimaryContainer40,
+    error = SeaCottageWhaleDark40
 )
 
 
@@ -33,6 +34,7 @@ fun seaCottageDarkColors() = darkColorScheme(
     secondary = SeaCottageMint80,
     tertiary = SeaCottageWhaleLight80,
     primaryContainer = SeaCottagePrimaryContainer80,
+    error = SeaCottageWhaleDark80
 )
 
 fun retroSummerLightColors() = lightColorScheme(
@@ -41,6 +43,7 @@ fun retroSummerLightColors() = lightColorScheme(
     tertiary = RetroSummerOrangeLight40,
     onTertiary = RetroSummerSun40,
     primaryContainer = RetroSummerPrimaryContainer40,
+    error = RetroSummerOrangeDark40
 )
 
 fun retroSummerDarkColors() = darkColorScheme(
@@ -48,6 +51,7 @@ fun retroSummerDarkColors() = darkColorScheme(
     secondary = RetroSummerSun80,
     tertiary = RetroSummerOrangeLight80,
     primaryContainer = RetroSummerPrimaryContainer80,
+    error = RetroSummerOrangeDark80
 )
 
 fun purpleLightColors() = lightColorScheme(
@@ -55,6 +59,7 @@ fun purpleLightColors() = lightColorScheme(
     secondary = PurpleGrey40,
     tertiary = Pink40,
     primaryContainer = PurplePrimaryContainer40,
+    error = PurpleViolet40
 )
 
 fun purpleDarkColors() = darkColorScheme(
@@ -62,6 +67,7 @@ fun purpleDarkColors() = darkColorScheme(
     secondary = PurpleGrey80,
     tertiary = Pink80,
     primaryContainer = PurplePrimaryContainer80,
+    error = PurpleViolet80
 )
 
 
