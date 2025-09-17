@@ -60,7 +60,7 @@ private fun ProjectRow(project: Project, onOpen: () -> Unit, onDelete: () -> Uni
     ) {
         Column {
             Text(project.title.ifBlank { "Untitled" })
-            Text("Type: ${'$'}{project.type}")
+            Text("Type: ${project.type}")
         }
         Button(onClick = onDelete) { Text("Delete") }
     }
