@@ -17,14 +17,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.example.stitchcounterv3.domain.model.AdjustmentAmount
-import com.example.stitchcounterv3.domain.model.NavigationEvent
-import com.example.stitchcounterv3.feature.navigation.BottomNavGraph
+import com.example.stitchcounterv3.feature.navigation.RootNavGraph
 import com.example.stitchcounterv3.feature.sharedComposables.AdjustmentButtons
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 
-@BottomNavGraph
+@RootNavGraph
 @Destination
 @Composable
 fun DoubleCounterScreen(
@@ -33,23 +31,8 @@ fun DoubleCounterScreen(
     navigator: DestinationsNavigator
 ) {
     LaunchedEffect(projectId) { viewModel.loadProject(projectId) }
-    
-    // Collect navigation events and handle them
-    LaunchedEffect(viewModel) {
-        viewModel.navigationEvents.collect { event ->
-            when (event) {
-                is NavigationEvent.NavigateToScreen -> {
-                    navigator.navigate(event.destination)
-                }
-                is NavigationEvent.PopBackStack -> {
-                    navigator.popBackStack()
-                }
-                is NavigationEvent.NavigateUp -> {
-                    navigator.popBackStack()
-                }
-            }
-        }
-    }
+
+    //todo handle navigation
     
     val state by viewModel.uiState.collectAsState()
     Surface(modifier = Modifier.fillMaxSize()) {
@@ -79,8 +62,9 @@ fun DoubleCounterScreen(
 
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 Button(onClick = viewModel::save) { Text("Save") }
-                Button(onClick = viewModel::saveAndGoBack) { Text("Save & Back") }
-                Button(onClick = viewModel::goToLibrary) { Text("Library") }
+                Button(onClick = {
+                    viewModel.saveAndGoBack(navigator)
+                }) { Text("Save & Back") }
             }
         }
     }

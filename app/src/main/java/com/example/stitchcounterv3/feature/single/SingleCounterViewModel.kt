@@ -3,19 +3,15 @@ package com.example.stitchcounterv3.feature.single
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.stitchcounterv3.domain.model.AdjustmentAmount
-import com.example.stitchcounterv3.domain.model.NavigationEvent
 import com.example.stitchcounterv3.domain.model.Project
 import com.example.stitchcounterv3.domain.model.ProjectType
 import com.example.stitchcounterv3.domain.usecase.GetProject
 import com.example.stitchcounterv3.domain.usecase.UpsertProject
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
-import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
@@ -34,10 +30,6 @@ open class SingleCounterViewModel @Inject constructor(
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(SingleCounterUiState())
     open val uiState: StateFlow<SingleCounterUiState> = _uiState.asStateFlow()
-
-    // Channel for one-time navigation events
-    private val _navigationEvents = Channel<NavigationEvent>(Channel.UNLIMITED)
-    val navigationEvents: Flow<NavigationEvent> = _navigationEvents.receiveAsFlow()
 
     fun loadProject(projectId: Int?) {
         viewModelScope.launch {
@@ -96,13 +88,6 @@ open class SingleCounterViewModel @Inject constructor(
             }
         }
     }
-    
-    // Navigate back to main screen after saving
-    fun saveAndGoBack() {//todo
-        save()
-        viewModelScope.launch {
-            _navigationEvents.send(NavigationEvent.PopBackStack)
-        }
-    }
+
 }
 

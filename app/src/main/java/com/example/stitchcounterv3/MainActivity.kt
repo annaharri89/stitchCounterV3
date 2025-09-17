@@ -11,7 +11,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.example.stitchcounterv3.feature.navigation.BottomNavigationScreen
+import com.example.stitchcounterv3.feature.navigation.RootNavigationScreen
 import com.example.stitchcounterv3.feature.theme.ThemeViewModel
 import com.example.stitchcounterv3.ui.theme.StitchCounterV3Theme
 import dagger.hilt.android.AndroidEntryPoint
@@ -28,14 +28,9 @@ class MainActivity : ComponentActivity() {
             
             StitchCounterV3Theme(theme = themeUiState.selectedTheme) {
                 Surface(modifier = Modifier.fillMaxSize()) {
-                    AppContent()
+                    RootNavigationScreen()
                 }
             }
         }
     }
-}
-
-@Composable
-private fun AppContent() {
-    BottomNavigationScreen()
 }
