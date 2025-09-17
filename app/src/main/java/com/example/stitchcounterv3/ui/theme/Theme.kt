@@ -16,7 +16,10 @@ fun seaCottageLightColors() = lightColorScheme(
     tertiary = SeaCottageWhaleLight40,
     primaryContainer = SeaCottagePrimaryContainer40,
     error = SeaCottageWhaleDark40,
-    onError = Color.White
+    onError = Color.White,
+    onPrimary = Color.White,
+    onSecondary = Color.White,
+    onTertiary = Color.White
 )
 
 
@@ -26,6 +29,9 @@ fun seaCottageDarkColors() = darkColorScheme(
     tertiary = SeaCottageWhaleLight80,
     primaryContainer = SeaCottagePrimaryContainer80,
     error = SeaCottageWhaleDark80,
+    onPrimary = Color.Black,
+    onSecondary = Color.Black,
+    onTertiary = Color.White,
     onError = Color.White
 )
 
@@ -33,9 +39,11 @@ fun retroSummerLightColors() = lightColorScheme(
     primary =  RetroSummerCactus40 ,
     secondary = RetroSummerSun40,
     tertiary = RetroSummerOrangeLight40,
-    onTertiary = RetroSummerSun40,
+    onTertiary = Color.White,
     primaryContainer = RetroSummerPrimaryContainer40,
-    error = RetroSummerOrangeDark40
+    error = RetroSummerOrangeDark40,
+    onPrimary = Color.White,
+    onSecondary = Color.White
 )
 
 fun retroSummerDarkColors() = darkColorScheme(
@@ -43,7 +51,10 @@ fun retroSummerDarkColors() = darkColorScheme(
     secondary = RetroSummerSun80,
     tertiary = RetroSummerOrangeLight80,
     primaryContainer = RetroSummerPrimaryContainer80,
-    error = RetroSummerOrangeDark80
+    error = RetroSummerOrangeDark80,
+    onPrimary = Color.White,
+    onSecondary = Color.Black,
+    onTertiary = Color.White
 )
 
 fun purpleLightColors() = lightColorScheme(
@@ -51,7 +62,10 @@ fun purpleLightColors() = lightColorScheme(
     secondary = PurpleGrey40,
     tertiary = Pink40,
     primaryContainer = PurplePrimaryContainer40,
-    error = PurpleViolet40
+    error = PurpleViolet40,
+    onPrimary = Color.White,
+    onSecondary = Color.White,
+    onTertiary = Color.White
 )
 
 fun purpleDarkColors() = darkColorScheme(
@@ -59,7 +73,10 @@ fun purpleDarkColors() = darkColorScheme(
     secondary = PurpleGrey80,
     tertiary = Pink80,
     primaryContainer = PurplePrimaryContainer80,
-    error = PurpleViolet80
+    error = PurpleViolet80,
+    onPrimary = Color.White,
+    onSecondary = Color.White,
+    onTertiary = Color.White
 )
 
 

@@ -25,12 +25,17 @@ fun AdjustmentButtons(
         Spacer(modifier = Modifier.weight(1f))
         AdjustmentAmount.entries.forEach { amount ->
             val isSelected = amount == selectedAdjustmentAmount
-            val buttonColors = ButtonDefaults.buttonColors().copy(
+            val buttonColors = ButtonDefaults.buttonColors(
                 containerColor = if (isSelected) {
                     MaterialTheme.colorScheme.secondary
                 } else {
                     MaterialTheme.colorScheme.tertiary
-                }
+                },
+                contentColor = if (isSelected) {
+                    MaterialTheme.colorScheme.onSecondary
+                } else {
+                    MaterialTheme.colorScheme.onTertiary
+                },
             )
             Button(
                 colors = buttonColors,

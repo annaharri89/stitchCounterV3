@@ -95,8 +95,9 @@ fun SingleCounterLandScapeLayout(
         ) {
             Spacer(modifier = Modifier.weight(1f))
             Button(
-                colors = ButtonDefaults.buttonColors().copy(
-                    containerColor = MaterialTheme.colorScheme.error
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.error,
+                    contentColor = androidx.compose.ui.graphics.Color.White
                 ),
                 onClick = { viewModel.reset() }) {
                 Text("Reset")

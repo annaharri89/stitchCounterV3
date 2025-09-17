@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -19,6 +18,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -50,7 +50,8 @@ fun SingleCounterPortraitLayout(
             verticalAlignment = Alignment.CenterVertically) {
             Button(
                 colors = ButtonDefaults.buttonColors().copy(
-                    containerColor = MaterialTheme.colorScheme.secondary.copy(alpha = .7f)
+                    containerColor = MaterialTheme.colorScheme.secondary.copy(alpha = .7f),
+                    contentColor = Color.White
                 ),
                 modifier = Modifier.weight(1f).aspectRatio(1f),
                 onClick = { viewModel.decrement() },
@@ -99,8 +100,9 @@ fun SingleCounterPortraitLayout(
         ) {
             Spacer(modifier = Modifier.weight(1f))
             Button(
-                colors = ButtonDefaults.buttonColors().copy(
-                    containerColor = MaterialTheme.colorScheme.error
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.error,
+                    contentColor = androidx.compose.ui.graphics.Color.White
                 ),
                 onClick = { viewModel.reset() }) {
                 Text("Reset")
