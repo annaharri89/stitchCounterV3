@@ -29,10 +29,10 @@ fun SingleCounterScreen(
     Surface(modifier = Modifier.fillMaxSize()) {
         AdaptiveLayout(
             portraitContent = {
-                SingleCounterPortraitScreen(state, viewModel)
+                SingleCounterPortraitLayout(state, viewModel)
             },
             landscapeContent = {
-                SingleCounterLandScapeScreen(state, viewModel)
+                SingleCounterLandScapeLayout(state, viewModel)
             }
         )
     }

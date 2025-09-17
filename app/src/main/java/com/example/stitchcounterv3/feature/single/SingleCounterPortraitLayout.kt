@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
@@ -22,16 +21,17 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.stitchcounterv3.domain.model.AdjustmentAmount
+import com.example.stitchcounterv3.feature.sharedComposables.AdjustmentButtons
 import com.example.stitchcounterv3.ui.theme.StitchCounterV3Theme
 
 @Composable
-fun SingleCounterLandScapeScreen(
+fun SingleCounterPortraitLayout(
     state: SingleCounterUiState,
     viewModel: SingleCounterViewModel
 ) {
-    Row(
-        modifier = Modifier.padding(24.dp)
+    Column(
+        modifier = Modifier.padding(24.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         Text(
             "Basic Counter",
@@ -72,28 +72,10 @@ fun SingleCounterLandScapeScreen(
                 )
             }
         }
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
-        ) {
-            Spacer(modifier = Modifier.weight(1f))
-            Button(
-                colors = ButtonDefaults.buttonColors().copy(containerColor = MaterialTheme.colorScheme.secondary),
-                onClick = { viewModel.changeAdjustment(AdjustmentAmount.ONE) }) {
-                Text("+1")
-            }
-            Button(
-                colors = ButtonDefaults.buttonColors().copy(containerColor = MaterialTheme.colorScheme.tertiary),
-                onClick = { viewModel.changeAdjustment(AdjustmentAmount.FIVE) }) {
-                Text("+5")
-            }
-            Button(
-                colors = ButtonDefaults.buttonColors().copy(containerColor = MaterialTheme.colorScheme.error),
-                onClick = { viewModel.changeAdjustment(AdjustmentAmount.TEN) }) {
-                Text("+10")
-            }
-            Spacer(modifier = Modifier.weight(1f))
-        }
+        AdjustmentButtons(
+            onAdjustmentClick = { viewModel.changeAdjustment(it) },
+            modifier = Modifier.fillMaxWidth()
+        )
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.Center
@@ -114,7 +96,7 @@ fun SingleCounterLandScapeScreen(
 
 @Preview
 @Composable
-private fun SingleCounterLandScapeScreenPreview() {
+private fun SingleCounterPortraitPreview() {
     StitchCounterV3Theme {
         // Preview without navigation dependencies
         Surface(modifier = Modifier.fillMaxSize()) {
