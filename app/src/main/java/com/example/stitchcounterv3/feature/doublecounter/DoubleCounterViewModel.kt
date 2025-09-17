@@ -47,9 +47,9 @@ open class DoubleCounterViewModel @Inject constructor(
                         id = project.id,
                         title = project.title,
                         stitchCount = project.stitchCounterNumber,
-                        stitchAdjustment = AdjustmentAmount.valueOf(project.stitchAdjustment.toString()),
+                        stitchAdjustment = AdjustmentAmount.entries.find { it.adjustmentAmount == project.stitchAdjustment } ?: AdjustmentAmount.ONE,
                         rowCount = project.rowCounterNumber,
-                        rowAdjustment = AdjustmentAmount.valueOf(project.rowAdjustment.toString()),
+                        rowAdjustment = AdjustmentAmount.entries.find { it.adjustmentAmount == project.rowAdjustment } ?: AdjustmentAmount.ONE,
                         totalRows = project.totalRows,
                         isLoading = false
                     )

@@ -42,7 +42,7 @@ open class SingleCounterViewModel @Inject constructor(
                         id = project.id,
                         title = project.title,
                         count = project.stitchCounterNumber,
-                        adjustment = AdjustmentAmount.valueOf(project.stitchAdjustment.toString()),
+                        adjustment = AdjustmentAmount.entries.find { it.adjustmentAmount == project.stitchAdjustment } ?: AdjustmentAmount.ONE,
                         isLoading = false
                     )
                 }
