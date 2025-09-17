@@ -46,19 +46,26 @@ fun DoubleCounterScreen(
                 Button(onClick = viewModel::incStitch) { Text("+") }
                 Button(onClick = viewModel::resetStitch) { Text("Reset") }
             }
+
             AdjustmentButtons(
-                onAdjustmentClick = viewModel::changeStitchAdjustment
-            )
+                selectedAdjustmentAmount = state.stitchAdjustment,
+                onAdjustmentClick = {
+                    viewModel.changeStitchAdjustment(it)
+                })
 
             Text("Rows: ${state.rowCount}")
+
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 Button(onClick = viewModel::decRow) { Text("-") }
                 Button(onClick = viewModel::incRow) { Text("+") }
                 Button(onClick = viewModel::resetRow) { Text("Reset") }
             }
+
             AdjustmentButtons(
-                onAdjustmentClick = viewModel::changeRowAdjustment
-            )
+                selectedAdjustmentAmount = state.rowAdjustment,
+                onAdjustmentClick = {
+                    viewModel.changeRowAdjustment(it)
+                })
 
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 Button(onClick = viewModel::save) { Text("Save") }

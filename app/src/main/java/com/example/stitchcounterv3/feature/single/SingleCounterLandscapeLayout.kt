@@ -23,6 +23,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.stitchcounterv3.domain.model.AdjustmentAmount
+import com.example.stitchcounterv3.feature.sharedComposables.AdjustmentButtons
 import com.example.stitchcounterv3.ui.theme.StitchCounterV3Theme
 
 @Composable
@@ -46,7 +47,9 @@ fun SingleCounterLandScapeLayout(
         Text("Count: ${state.count}", style = MaterialTheme.typography.headlineMedium)
         Row(horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.CenterVertically) {
             Button(
-                modifier = Modifier.weight(1f).aspectRatio(1f),
+                modifier = Modifier
+                    .weight(1f)
+                    .aspectRatio(1f),
                 onClick = { viewModel.decrement() },
                 shape = RoundedCornerShape(12.dp)
             ) {
@@ -59,7 +62,9 @@ fun SingleCounterLandScapeLayout(
                 )
             }
             Button(
-                modifier = Modifier.weight(1f).aspectRatio(1f),
+                modifier = Modifier
+                    .weight(1f)
+                    .aspectRatio(1f),
                 onClick = { viewModel.increment() },
                 shape = RoundedCornerShape(12.dp)
             ) {
@@ -72,28 +77,11 @@ fun SingleCounterLandScapeLayout(
                 )
             }
         }
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
-        ) {
-            Spacer(modifier = Modifier.weight(1f))
-            Button(
-                colors = ButtonDefaults.buttonColors().copy(containerColor = MaterialTheme.colorScheme.secondary),
-                onClick = { viewModel.changeAdjustment(AdjustmentAmount.ONE) }) {
-                Text("+1")
-            }
-            Button(
-                colors = ButtonDefaults.buttonColors().copy(containerColor = MaterialTheme.colorScheme.tertiary),
-                onClick = { viewModel.changeAdjustment(AdjustmentAmount.FIVE) }) {
-                Text("+5")
-            }
-            Button(
-                colors = ButtonDefaults.buttonColors().copy(containerColor = MaterialTheme.colorScheme.error),
-                onClick = { viewModel.changeAdjustment(AdjustmentAmount.TEN) }) {
-                Text("+10")
-            }
-            Spacer(modifier = Modifier.weight(1f))
-        }
+        AdjustmentButtons(
+            selectedAdjustmentAmount = state.adjustment,
+            onAdjustmentClick = {
+                viewModel.changeAdjustment(it)
+        })
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.Center
@@ -106,7 +94,13 @@ fun SingleCounterLandScapeLayout(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Spacer(modifier = Modifier.weight(1f))
-            Button(onClick = { viewModel.reset() }) { Text("Reset") }
+            Button(
+                colors = ButtonDefaults.buttonColors().copy(
+                    containerColor = MaterialTheme.colorScheme.error
+                ),
+                onClick = { viewModel.reset() }) {
+                Text("Reset")
+            }
             Spacer(modifier = Modifier.weight(1f))
         }
     }

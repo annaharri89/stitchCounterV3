@@ -10,6 +10,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonColors
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
@@ -73,9 +75,11 @@ fun SingleCounterPortraitLayout(
             }
         }
         AdjustmentButtons(
-            onAdjustmentClick = { viewModel.changeAdjustment(it) },
-            modifier = Modifier.fillMaxWidth()
-        )
+            selectedAdjustmentAmount = state.adjustment,
+            onAdjustmentClick = {
+                viewModel.changeAdjustment(it)
+            })
+
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.Center
@@ -88,7 +92,13 @@ fun SingleCounterPortraitLayout(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Spacer(modifier = Modifier.weight(1f))
-            Button(onClick = { viewModel.reset() }) { Text("Reset") }
+            Button(
+                colors = ButtonDefaults.buttonColors().copy(
+                    containerColor = MaterialTheme.colorScheme.error
+                ),
+                onClick = { viewModel.reset() }) {
+                Text("Reset")
+            }
             Spacer(modifier = Modifier.weight(1f))
         }
     }

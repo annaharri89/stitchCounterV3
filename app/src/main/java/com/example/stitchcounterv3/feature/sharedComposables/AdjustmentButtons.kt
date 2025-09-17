@@ -14,6 +14,7 @@ import com.example.stitchcounterv3.domain.model.AdjustmentAmount
 
 @Composable
 fun AdjustmentButtons(
+    selectedAdjustmentAmount: AdjustmentAmount,
     onAdjustmentClick: (AdjustmentAmount) -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -23,18 +24,14 @@ fun AdjustmentButtons(
     ) {
         Spacer(modifier = Modifier.weight(1f))
         AdjustmentAmount.entries.forEach { amount ->
-            val buttonColors = when (amount) {
-                AdjustmentAmount.ONE -> ButtonDefaults.buttonColors().copy(
-                    containerColor = MaterialTheme.colorScheme.secondary
-                )
-                AdjustmentAmount.FIVE -> ButtonDefaults.buttonColors().copy(
-                    containerColor = MaterialTheme.colorScheme.tertiary
-                )
-                AdjustmentAmount.TEN -> ButtonDefaults.buttonColors().copy(
-                    containerColor = MaterialTheme.colorScheme.error
-                )
-            }
-
+            val isSelected = amount == selectedAdjustmentAmount
+            val buttonColors = ButtonDefaults.buttonColors().copy(
+                containerColor = if (isSelected) {
+                    MaterialTheme.colorScheme.secondary
+                } else {
+                    MaterialTheme.colorScheme.tertiary
+                }
+            )
             Button(
                 colors = buttonColors,
                 onClick = { onAdjustmentClick(amount) }
