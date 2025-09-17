@@ -12,9 +12,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.stitchcounterv3.feature.navigation.BottomNavigationScreen
-import com.example.stitchcounterv3.feature.destinations.BottomNavigationScreenDestination
-import com.ramcosta.composedestinations.DestinationsNavHost
-import com.example.stitchcounterv3.feature.NavGraphs
 import com.example.stitchcounterv3.feature.theme.ThemeViewModel
 import com.example.stitchcounterv3.ui.theme.StitchCounterV3Theme
 import dagger.hilt.android.AndroidEntryPoint
@@ -40,8 +37,5 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 private fun AppContent() {
-    DestinationsNavHost(
-        navGraph = NavGraphs.root,
-        startRoute = BottomNavigationScreenDestination
-    )
+    BottomNavigationScreen()
 }

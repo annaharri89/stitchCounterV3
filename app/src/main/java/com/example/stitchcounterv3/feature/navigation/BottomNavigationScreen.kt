@@ -19,35 +19,41 @@ import androidx.compose.material3.NavigationRailItemColors
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.ui.platform.LocalConfiguration
-import android.content.res.Configuration
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.NavHostController
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.stitchcounterv3.feature.destinations.LibraryScreenDestination
 import com.example.stitchcounterv3.feature.destinations.MainScreenDestination
 import com.example.stitchcounterv3.feature.destinations.SettingsScreenDestination
 import com.ramcosta.composedestinations.DestinationsNavHost
 import com.example.stitchcounterv3.feature.NavGraphs
-import com.ramcosta.composedestinations.annotation.Destination
+import com.ramcosta.composedestinations.navigation.navigate
 
-@RootNavGraph(start = true)
-@Destination
 @Composable
 fun BottomNavigationScreen(
     viewModel: BottomNavigationViewModel = hiltViewModel()
 ) {
-    val selectedTab by viewModel.selectedTab.collectAsState()
+    val selectedTab = viewModel.selectedTab.collectAsStateWithLifecycle().value
     val configuration = LocalConfiguration.current
     val isCompact = configuration.screenWidthDp < 600 // 600dp is the breakpoint for tablets
     
     // Single navigation controller that persists across orientation changes
     val navController = rememberNavController()
+    
+    LaunchedEffect(selectedTab) {
+        when (selectedTab) {
+            BottomNavTab.HOME -> navController.navigate(MainScreenDestination())
+            BottomNavTab.LIBRARY -> navController.navigate(LibraryScreenDestination())
+            BottomNavTab.SETTINGS -> navController.navigate(SettingsScreenDestination())
+        }
+    }
     
     if (isCompact) {
         // Use bottom navigation for compact screens (phones in portrait)
