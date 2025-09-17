@@ -46,8 +46,12 @@ fun SingleCounterPortraitLayout(
             label = { Text("Project Name") }
         )
         Text("Count: ${state.count}", style = MaterialTheme.typography.headlineMedium)
-        Row(horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.CenterVertically) {
+        Row(horizontalArrangement = Arrangement.spacedBy(12.dp),
+            verticalAlignment = Alignment.CenterVertically) {
             Button(
+                colors = ButtonDefaults.buttonColors().copy(
+                    containerColor = MaterialTheme.colorScheme.secondary.copy(alpha = .7f)
+                ),
                 modifier = Modifier.weight(1f).aspectRatio(1f),
                 onClick = { viewModel.decrement() },
                 shape = RoundedCornerShape(12.dp)
@@ -61,7 +65,9 @@ fun SingleCounterPortraitLayout(
                 )
             }
             Button(
-                modifier = Modifier.weight(1f).aspectRatio(1f),
+                modifier = Modifier
+                    .weight(1f)
+                    .aspectRatio(1f),
                 onClick = { viewModel.increment() },
                 shape = RoundedCornerShape(12.dp)
             ) {
