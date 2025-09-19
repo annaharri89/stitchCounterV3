@@ -63,22 +63,22 @@ open class DoubleCounterViewModel @Inject constructor(
     fun setTitle(title: String) { _uiState.update { currentState -> currentState.copy(title = title) } }
     fun setTotalRows(rows: Int) { _uiState.update { currentState -> currentState.copy(totalRows = rows.coerceAtLeast(0)) } }
 
-    fun changeStitchAdjustment(value: AdjustmentAmount) { _uiState.update { currentState -> currentState.copy(stitchAdjustment = value) } }
-    fun changeRowAdjustment(value: AdjustmentAmount) { _uiState.update { currentState -> currentState.copy(rowAdjustment = value) } }
+    fun changeStitchAdjustment(value: AdjustmentAmount) { _uiState.update { currentState -> currentState.copy(stitchAdjustment = value) } }//todo lots of repeated code, fix this
+    fun changeRowAdjustment(value: AdjustmentAmount) { _uiState.update { currentState -> currentState.copy(rowAdjustment = value) } }//todo lots of repeated code, fix this
 
-    fun incStitch() { _uiState.update { currentState -> currentState.copy(stitchCount = currentState.stitchCount + currentState.stitchAdjustment.adjustmentAmount) } }
-    fun decStitch() { _uiState.update { currentState -> currentState.copy(stitchCount = (currentState.stitchCount - currentState.stitchAdjustment.adjustmentAmount).coerceAtLeast(0)) } }
-    fun resetStitch() { _uiState.update { currentState -> currentState.copy(stitchCount = 0) } }
+    fun incStitch() { _uiState.update { currentState -> currentState.copy(stitchCount = currentState.stitchCount + currentState.stitchAdjustment.adjustmentAmount) } }//todo lots of repeated code, fix this
+    fun decStitch() { _uiState.update { currentState -> currentState.copy(stitchCount = (currentState.stitchCount - currentState.stitchAdjustment.adjustmentAmount).coerceAtLeast(0)) } }//todo lots of repeated code, fix this
+    fun resetStitch() { _uiState.update { currentState -> currentState.copy(stitchCount = 0) } }//todo lots of repeated code, fix this
 
-    fun incRow() {
+    fun incRow() {//todo lots of repeated code, fix this
         val newRow = _uiState.value.rowCount + _uiState.value.rowAdjustment.adjustmentAmount
         _uiState.update { currentState -> currentState.copy(rowCount = newRow) }
     }
-    fun decRow() {
+    fun decRow() {//todo lots of repeated code, fix this
         val newRow = (_uiState.value.rowCount - _uiState.value.rowAdjustment.adjustmentAmount).coerceAtLeast(0)
         _uiState.update { currentState -> currentState.copy(rowCount = newRow) }
     }
-    fun resetRow() { _uiState.update { currentState -> currentState.copy(rowCount = 0) } }
+    fun resetRow() { _uiState.update { currentState -> currentState.copy(rowCount = 0) } }//todo lots of repeated code, fix this
 
     fun save() {
         viewModelScope.launch {

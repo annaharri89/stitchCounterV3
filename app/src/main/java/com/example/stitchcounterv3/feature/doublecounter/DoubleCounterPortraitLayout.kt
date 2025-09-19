@@ -1,4 +1,4 @@
-package com.example.stitchcounterv3.feature.single
+package com.example.stitchcounterv3.feature.doublecounter
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -21,15 +21,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.example.stitchcounterv3.feature.sharedComposables.AdjustmentButtons
+import com.example.stitchcounterv3.domain.model.AdjustmentAmount
 import com.example.stitchcounterv3.feature.sharedComposables.CounterButtons
+import com.example.stitchcounterv3.feature.sharedComposables.CounterSection
 import com.example.stitchcounterv3.feature.sharedComposables.ResizableText
 import com.example.stitchcounterv3.ui.theme.StitchCounterV3Theme
 
 @Composable
-fun SingleCounterPortraitLayout(
-    state: SingleCounterUiState,
-    viewModel: SingleCounterViewModel
+fun DoubleCounterPortraitLayout(
+    state: DoubleCounterUiState,
+    viewModel: DoubleCounterViewModel
 ) {
     Column(
         modifier = Modifier.padding(24.dp),
@@ -42,34 +43,43 @@ fun SingleCounterPortraitLayout(
             onValueChange = { viewModel.setTitle(it) },
             label = { Text("Project Name") }
         )
+        
+        OutlinedTextField(
+            modifier = Modifier.fillMaxWidth(),
+            value = state.totalRows.toString(),
+            onValueChange = { v -> v.toIntOrNull()?.let(viewModel::setTotalRows) },
+            label = { Text("Total Rows") }
+        )
 
-        ResizableText(
-            text = state.count.toString(),
+        // Stitches Counter Section
+        CounterSection(
             modifier = Modifier.weight(1f),
-            heightRatio =  0.8f,
-            widthRatio = 0.4f,
-            minFontSize = 48f,
-            maxFontSize = 300f
+            label = "Stitches",
+            count = state.stitchCount,
+            selectedAdjustmentAmount = state.stitchAdjustment,
+            onIncrement = { viewModel.incStitch() },
+            onDecrement = { viewModel.decStitch() },
+            onReset = { viewModel.resetStitch() },
+            onAdjustmentClick = { viewModel.changeStitchAdjustment(it) }
         )
 
-        CounterButtons(
-            onIncrement = { viewModel.increment() },
-            onDecrement = { viewModel.decrement() },
-            buttonSpacing = 24,
-            buttonShape = RoundedCornerShape(12.dp),
-            incrementFontSize = 60,
-            decrementFontSize = 80
-        )
-
-        AdjustmentButtons(
-            selectedAdjustmentAmount = state.adjustment,
-            onAdjustmentClick = { viewModel.changeAdjustment(it) },
+        // Rows Counter Section
+        CounterSection(
+            modifier = Modifier.weight(1f),
+            label = "Rows/Rounds",
+            count = state.rowCount,
+            selectedAdjustmentAmount = state.rowAdjustment,
+            onIncrement = { viewModel.incRow() },
+            onDecrement = { viewModel.decRow() },
+            onReset = { viewModel.resetRow() },
+            onAdjustmentClick = { viewModel.changeRowAdjustment(it) }
         )
         
-        Spacer(modifier = Modifier.weight(.5f))
+        Spacer(modifier = Modifier.weight(.25f))
 
         // Action buttons
         Row(
+            modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             Button(
@@ -77,10 +87,10 @@ fun SingleCounterPortraitLayout(
                     containerColor = MaterialTheme.colorScheme.error,
                     contentColor = Color.White
                 ),
-                onClick = { viewModel.reset() },
+                onClick = { viewModel.resetStitch(); viewModel.resetRow() },
                 modifier = Modifier.weight(1f)
             ) {
-                Text("Reset")
+                Text("Reset All")
             }
 
             Button(
@@ -95,36 +105,50 @@ fun SingleCounterPortraitLayout(
 
 @Preview
 @Composable
-private fun SingleCounterPortraitPreview() {
+private fun DoubleCounterPortraitPreview() {
     StitchCounterV3Theme {
-        // Preview without navigation dependencies
         Surface(modifier = Modifier.fillMaxSize()) {
             Column(
                 modifier = Modifier.padding(24.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                Text("Basic Counter", style = MaterialTheme.typography.titleLarge)
+                Text("Double Counter", style = MaterialTheme.typography.titleLarge)
                 OutlinedTextField(
                     value = "Sample Project",
                     onValueChange = { },
                     label = { Text("Project Name") }
                 )
-                Text("Count: 0", style = MaterialTheme.typography.headlineMedium)
-                CounterButtons(
+                OutlinedTextField(
+                    value = "50",
+                    onValueChange = { },
+                    label = { Text("Total Rows") }
+                )
+                
+                CounterSection(
+                    label = "Stitches",
+                    count = 42,
+                    selectedAdjustmentAmount = AdjustmentAmount.FIVE,
                     onIncrement = { },
                     onDecrement = { },
-                    buttonSpacing = 24,
-                    buttonShape = RoundedCornerShape(12.dp),
-                    incrementFontSize = 60,
-                    decrementFontSize = 80
+                    onReset = { },
+                    onAdjustmentClick = { },
+
                 )
-                Row(horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.CenterVertically) {
-                    Spacer(modifier = Modifier.weight(1f))
-                    Button(onClick = { }) { Text("Reset") }
-                    Spacer(modifier = Modifier.weight(1f))
+                
+                CounterSection(
+                    label = "Rows/Rounds",
+                    count = 15,
+                    selectedAdjustmentAmount = AdjustmentAmount.FIVE,
+                    onIncrement = { },
+                    onDecrement = { },
+                    onReset = { },
+                    onAdjustmentClick = { }
+                )
+                
+                Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                    Button(onClick = { }) { Text("Save") }
+                    Button(onClick = { }) { Text("Reset All") }
                 }
-                Button(onClick = { }) { Text("Save") }
-                Button(onClick = { }) { Text("Go to Library") }
             }
         }
     }
