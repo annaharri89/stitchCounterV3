@@ -32,7 +32,7 @@ fun SingleCounterScreen(
                 SingleCounterPortraitLayout(state, viewModel)
             },
             landscapeContent = {
-                SingleCounterLandScapeLayout(state, viewModel)
+                SingleCounterLandscapeLayout(state, viewModel)
             }
         )
     }
