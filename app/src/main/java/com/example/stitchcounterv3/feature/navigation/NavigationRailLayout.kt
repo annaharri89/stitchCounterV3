@@ -1,6 +1,7 @@
 package com.example.stitchcounterv3.feature.navigation
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.tween
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.material3.Icon
@@ -27,10 +28,12 @@ fun NavigationRailLayout(
     AnimatedVisibility(
         visible = true,
         enter = slideInHorizontally(
-            initialOffsetX = { fullWidth -> -fullWidth }
+            initialOffsetX = { fullWidth -> -fullWidth },
+            animationSpec = tween(durationMillis = AnimationConstants.NAVIGATION_ANIMATION_DURATION)
         ),
         exit = slideOutHorizontally(
-            targetOffsetX = { fullWidth -> -fullWidth }
+            targetOffsetX = { fullWidth -> -fullWidth },
+            animationSpec = tween(durationMillis = AnimationConstants.NAVIGATION_ANIMATION_DURATION)
         )
     ) {
         NavigationRailComponent(

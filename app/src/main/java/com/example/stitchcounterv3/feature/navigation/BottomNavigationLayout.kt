@@ -1,6 +1,7 @@
 package com.example.stitchcounterv3.feature.navigation
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.tween
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.layout.fillMaxSize
@@ -33,10 +34,12 @@ fun BottomNavigationLayout(
     AnimatedVisibility(
         visible = true,
         enter = slideInVertically(
-            initialOffsetY = { fullHeight -> fullHeight }
+            initialOffsetY = { fullHeight -> fullHeight },
+            animationSpec = tween(durationMillis = AnimationConstants.NAVIGATION_ANIMATION_DURATION)
         ),
         exit = slideOutVertically(
-            targetOffsetY = { fullHeight -> fullHeight }
+            targetOffsetY = { fullHeight -> fullHeight },
+            animationSpec = tween(durationMillis = AnimationConstants.NAVIGATION_ANIMATION_DURATION)
         )
     ) {
         BottomNavigationBar(

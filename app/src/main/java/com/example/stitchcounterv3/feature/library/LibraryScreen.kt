@@ -1,5 +1,6 @@
 package com.example.stitchcounterv3.feature.library
 
+import android.util.Log
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -21,16 +22,22 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.stitchcounterv3.domain.model.Project
+import com.example.stitchcounterv3.domain.model.ProjectType
 import com.example.stitchcounterv3.feature.navigation.RootNavGraph
+import com.example.stitchcounterv3.feature.navigation.RootNavigationViewModel
+import com.example.stitchcounterv3.feature.navigation.SheetScreen
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
+
+private const val TAG_LIBRARY_SCREEN = "LibraryScreen"
 
 @RootNavGraph
 @Destination
 @Composable
 fun LibraryScreen(
     navigator: DestinationsNavigator,
-    viewModel: LibraryViewModel = hiltViewModel()
+    viewModel: LibraryViewModel = hiltViewModel(),
+    rootNavigationViewModel: RootNavigationViewModel
 ) {
     val projects by viewModel.projects.collectAsState()
     Surface(modifier = Modifier.fillMaxSize()) {
@@ -39,8 +46,23 @@ fun LibraryScreen(
                 items(projects) { project ->
                     ProjectRow(
                         project = project, 
-                        onOpen = { viewModel.navigateToEditProject(project, navigator) },
-                        onDelete = { viewModel.delete(project) }
+                        onOpen = { 
+                            Log.d(TAG_LIBRARY_SCREEN, "Opening project: ${project.title} (type: ${project.type}, id: ${project.id})")
+                            when (project.type) {
+                                ProjectType.SINGLE -> {
+                                    Log.d(TAG_LIBRARY_SCREEN, "Opening SingleCounter bottom sheet for project: ${project.id}")
+                                    rootNavigationViewModel.showBottomSheet(SheetScreen.SingleCounter(project.id))
+                                }
+                                ProjectType.DOUBLE -> {
+                                    Log.d(TAG_LIBRARY_SCREEN, "Opening DoubleCounter bottom sheet for project: ${project.id}")
+                                    rootNavigationViewModel.showBottomSheet(SheetScreen.DoubleCounter(project.id))
+                                }
+                            }
+                        },
+                        onDelete = { 
+                            Log.d(TAG_LIBRARY_SCREEN, "Deleting project: ${project.title}")
+                            viewModel.delete(project) 
+                        }
                     )
                     Divider()
                 }
