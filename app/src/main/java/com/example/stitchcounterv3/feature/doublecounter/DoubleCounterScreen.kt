@@ -31,12 +31,16 @@ fun DoubleCounterScreen(
     projectId: Int? = null,
     viewModel: DoubleCounterViewModel = hiltViewModel()
 ) {
-    
-    
+
+
     LaunchedEffect(projectId) {
-        viewModel.loadProject(projectId)
+        projectId?.let {
+            viewModel.loadProject(projectId)
+        } ?: run {
+            viewModel.resetState()
+        }
     }
-    
+
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     
     val configuration = LocalConfiguration.current

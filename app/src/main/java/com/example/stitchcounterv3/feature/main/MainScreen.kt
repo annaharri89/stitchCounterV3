@@ -32,14 +32,14 @@ fun MainScreen(
 
             Button(onClick = {
                 // Request SingleCounter bottom sheet (no project ID for new projects)
-                viewModel.showBottomSheet(SheetScreen.SingleCounter(null))
+                viewModel.showBottomSheet(SheetScreen.SingleCounter())
             }) {
                 Text("New Single Tracker")
             }
 
             Button(onClick = {
                 // Request DoubleCounter bottom sheet (no project ID for new projects)
-                viewModel.showBottomSheet(SheetScreen.DoubleCounter(null))
+                viewModel.showBottomSheet(SheetScreen.DoubleCounter())
             }) {
                 Text("New Double Tracker")
             }

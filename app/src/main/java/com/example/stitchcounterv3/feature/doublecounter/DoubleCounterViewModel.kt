@@ -7,6 +7,7 @@ import com.example.stitchcounterv3.domain.model.Project
 import com.example.stitchcounterv3.domain.model.ProjectType
 import com.example.stitchcounterv3.domain.usecase.GetProject
 import com.example.stitchcounterv3.domain.usecase.UpsertProject
+import com.example.stitchcounterv3.feature.single.SingleCounterUiState
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
@@ -104,6 +105,10 @@ open class DoubleCounterViewModel @Inject constructor(
     fun saveAndGoBack(navigator: DestinationsNavigator) {//todo I don't think I need this at all once I have it save on back swipe
         save()
         navigator.popBackStack()
+    }
+
+    fun resetState() {
+        _uiState.update { _ -> DoubleCounterUiState() }
     }
 }
 

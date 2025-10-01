@@ -4,7 +4,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -77,7 +76,7 @@ fun SingleCounterPortraitLayout(
                     containerColor = MaterialTheme.colorScheme.error,
                     contentColor = Color.White
                 ),
-                onClick = { viewModel.reset() },
+                onClick = { viewModel.resetCount() },
                 modifier = Modifier.weight(1f)
             ) {
                 Text("Reset")

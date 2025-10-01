@@ -66,7 +66,7 @@ fun SingleCounterLandscapeLayout(
                         containerColor = MaterialTheme.colorScheme.error,
                         contentColor = androidx.compose.ui.graphics.Color.White
                     ),
-                    onClick = { viewModel.reset() },
+                    onClick = { viewModel.resetCount() },
                     modifier = Modifier.weight(1f)
                 ) {
                     Text("Reset")

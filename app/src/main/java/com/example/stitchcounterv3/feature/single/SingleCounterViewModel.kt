@@ -68,8 +68,12 @@ open class SingleCounterViewModel @Inject constructor(
         _uiState.update { currentState -> currentState.copy(count = (currentState.count - currentState.adjustment.adjustmentAmount).coerceAtLeast(0)) }
     }
 
-    fun reset() {
+    fun resetCount() {
         _uiState.update { currentState -> currentState.copy(count = 0) }
+    }
+
+    fun resetState() {
+        _uiState.update { _ -> SingleCounterUiState() }
     }
 
     fun save() {

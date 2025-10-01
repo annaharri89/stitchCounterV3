@@ -119,6 +119,6 @@ fun RootNavigationScreen(viewModel: RootNavigationViewModel) {
 
 // Simple sealed class to track which sheet is open
 sealed class SheetScreen {
-    data class SingleCounter(val projectId: Int?) : SheetScreen()
-    data class DoubleCounter(val projectId: Int?) : SheetScreen()
+    data class SingleCounter(val projectId: Int? = null) : SheetScreen()
+    data class DoubleCounter(val projectId: Int? = null) : SheetScreen()
 }
