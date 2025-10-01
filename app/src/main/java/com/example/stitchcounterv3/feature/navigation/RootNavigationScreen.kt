@@ -3,6 +3,7 @@ package com.example.stitchcounterv3.feature.navigation
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
@@ -88,7 +89,7 @@ fun RootNavigationScreen(viewModel: RootNavigationViewModel) {
             },
             sheetState = sheetState,
             shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp),
-            modifier = Modifier.fillMaxHeight(0.9f)
+            modifier = Modifier.fillMaxHeight(0.98f).fillMaxWidth()
         ) {
             when (screen) {
                 is SheetScreen.SingleCounter -> {

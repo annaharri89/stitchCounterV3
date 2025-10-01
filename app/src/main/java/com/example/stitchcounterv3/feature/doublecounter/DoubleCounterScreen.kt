@@ -13,7 +13,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.stitchcounterv3.feature.navigation.RootNavGraph
 import com.example.stitchcounterv3.feature.sharedComposables.AdaptiveLayout
 import com.ramcosta.composedestinations.annotation.Destination
-import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 
 /**
  * Double Counter Screen - Material 3 Bottom Sheet Implementation
@@ -31,8 +30,6 @@ fun DoubleCounterScreen(
     projectId: Int? = null,
     viewModel: DoubleCounterViewModel = hiltViewModel()
 ) {
-
-
     LaunchedEffect(projectId) {
         projectId?.let {
             viewModel.loadProject(projectId)

@@ -3,12 +3,9 @@ package com.example.stitchcounterv3.feature.doublecounter
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
@@ -22,9 +19,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.stitchcounterv3.domain.model.AdjustmentAmount
-import com.example.stitchcounterv3.feature.sharedComposables.CounterButtons
 import com.example.stitchcounterv3.feature.sharedComposables.CounterSectionLandscape
-import com.example.stitchcounterv3.feature.sharedComposables.ResizableText
 import com.example.stitchcounterv3.ui.theme.StitchCounterV3Theme
 
 @Composable
@@ -34,8 +29,8 @@ fun DoubleCounterLandscapeLayout(
 ) {
     Row(
         modifier = Modifier
-            .fillMaxSize()
-            .padding(24.dp),
+            .fillMaxSize(),
+            //.padding(24.dp),
         horizontalArrangement = Arrangement.spacedBy(32.dp)
     ) {
         // Left side - Project info and Stitches counter
@@ -50,37 +45,36 @@ fun DoubleCounterLandscapeLayout(
                 label = { Text("Project Name") },
                 modifier = Modifier.fillMaxWidth()
             )
-            
+
             OutlinedTextField(
                 value = state.totalRows.toString(),
                 onValueChange = { v -> v.toIntOrNull()?.let(viewModel::setTotalRows) },
                 label = { Text("Total Rows") },
                 modifier = Modifier.fillMaxWidth()
             )
-
-            CounterSectionLandscape(
-                label = "Stitches",
-                count = state.stitchCount,
-                selectedAdjustmentAmount = state.stitchAdjustment,
-                onIncrement = { viewModel.incStitch() },
-                onDecrement = { viewModel.decStitch() },
-                onAdjustmentClick = { viewModel.changeStitchAdjustment(it) },
-                textWeight = 1f
-            )
         }
-        
+
+        CounterSectionLandscape(
+            modifier = Modifier.weight(1f),
+            label = "Stitches",
+            count = state.stitchCount,
+            selectedAdjustmentAmount = state.stitchAdjustment,
+            onIncrement = { viewModel.incStitch() },
+            onDecrement = { viewModel.decStitch() },
+            onAdjustmentClick = { viewModel.changeStitchAdjustment(it) },
+            textWeight = 1f
+        )
+
         // Right side - Rows counter
         CounterSectionLandscape(
+            modifier = Modifier.weight(1f),
             label = "Rows/Rounds",
             count = state.rowCount,
             selectedAdjustmentAmount = state.rowAdjustment,
             onIncrement = { viewModel.incRow() },
             onDecrement = { viewModel.decRow() },
             onAdjustmentClick = { viewModel.changeRowAdjustment(it) },
-            modifier = Modifier.weight(1f),
-            textWeight = 1f,
-            showTopSpacer = true,
-            showBottomSpacer = true
+            textWeight = 1f
         )
     }
     
@@ -118,13 +112,11 @@ private fun DoubleCounterLandscapePreview() {
         Surface(modifier = Modifier.fillMaxSize()) {
             Row(
                 modifier = Modifier
-                    .fillMaxSize()
-                    .padding(24.dp),
+                    .fillMaxSize(),
                 horizontalArrangement = Arrangement.spacedBy(32.dp)
             ) {
                 // Left side - Project info and Stitches counter
                 Column(
-                    modifier = Modifier.weight(1f),
                     verticalArrangement = Arrangement.spacedBy(16.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
@@ -141,18 +133,19 @@ private fun DoubleCounterLandscapePreview() {
                         label = { Text("Total Rows") },
                         modifier = Modifier.fillMaxWidth()
                     )
-
-                    CounterSectionLandscape(
-                        label = "Stitches",
-                        count = 42,
-                        selectedAdjustmentAmount = AdjustmentAmount.FIVE,
-                        onIncrement = { },
-                        onDecrement = { },
-                        onAdjustmentClick = { },
-                        textWeight = 1f
-                    )
                 }
-                
+
+                CounterSectionLandscape(
+                    modifier = Modifier.weight(1f),
+                    label = "Stitches",
+                    count = 42,
+                    selectedAdjustmentAmount = AdjustmentAmount.FIVE,
+                    onIncrement = { },
+                    onDecrement = { },
+                    onAdjustmentClick = { },
+                    textWeight = 1f
+                )
+
                 // Right side - Rows counter
                 CounterSectionLandscape(
                     label = "Rows/Rounds",
