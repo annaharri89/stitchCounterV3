@@ -1,6 +1,5 @@
 package com.example.stitchcounterv3.feature.navigation
 
-import android.util.Log
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -23,14 +22,12 @@ import com.ramcosta.composedestinations.animations.rememberAnimatedNavHostEngine
 import com.ramcosta.composedestinations.navigation.dependency
 import kotlinx.coroutines.launch
 
-private const val TAG_ROOT_NAVIGATION_SCREEN = "RootNavigationScreen"
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterialNavigationApi::class,
     ExperimentalAnimationApi::class
 )
 @Composable
 fun RootNavigationScreen(viewModel: RootNavigationViewModel) {
-    Log.d(TAG_ROOT_NAVIGATION_SCREEN, "RootNavigationScreen composable called")
 
     val selectedTab = viewModel.selectedTab.collectAsStateWithLifecycle().value
     val configuration = LocalConfiguration.current
@@ -41,7 +38,6 @@ fun RootNavigationScreen(viewModel: RootNavigationViewModel) {
 
     // Track current bottom sheet
     val currentSheetScreen by viewModel.currentSheet.collectAsStateWithLifecycle()
-    Log.d(TAG_ROOT_NAVIGATION_SCREEN, "RootNavigationScreen recomposed - currentSheetScreen state: $currentSheetScreen")
 
     // Material3 Bottom Sheet state
     val sheetState = rememberModalBottomSheetState(
@@ -83,10 +79,8 @@ fun RootNavigationScreen(viewModel: RootNavigationViewModel) {
 
     // Show bottom sheet if a sheet screen is selected
     currentSheetScreen?.let { screen ->
-        Log.d(TAG_ROOT_NAVIGATION_SCREEN, "Rendering ModalBottomSheet for screen: $screen")
         ModalBottomSheet(
             onDismissRequest = {
-                Log.d(TAG_ROOT_NAVIGATION_SCREEN, "ModalBottomSheet onDismissRequest called")
                 scope.launch {
                     sheetState.hide()
                     viewModel.showBottomSheet(null)
@@ -96,17 +90,14 @@ fun RootNavigationScreen(viewModel: RootNavigationViewModel) {
             shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp),
             modifier = Modifier.fillMaxHeight(0.9f)
         ) {
-            Log.d(TAG_ROOT_NAVIGATION_SCREEN, "ModalBottomSheet content rendering for: $screen")
             when (screen) {
                 is SheetScreen.SingleCounter -> {
-                    Log.d(TAG_ROOT_NAVIGATION_SCREEN, "Rendering SingleCounterScreen with projectId: ${screen.projectId}")
                     SingleCounterScreen(
                         projectId = screen.projectId,
                         viewModel = hiltViewModel()
                     )
                 }
                 is SheetScreen.DoubleCounter -> {
-                    Log.d(TAG_ROOT_NAVIGATION_SCREEN, "Rendering DoubleCounterScreen with projectId: ${screen.projectId}")
                     DoubleCounterScreen(
                         projectId = screen.projectId,
                         viewModel = hiltViewModel()
@@ -117,12 +108,10 @@ fun RootNavigationScreen(viewModel: RootNavigationViewModel) {
 
         // Automatically show sheet when currentSheetScreen changes
         LaunchedEffect(currentSheetScreen) {
-            Log.d(TAG_ROOT_NAVIGATION_SCREEN, "LaunchedEffect triggered for currentSheetScreen: $currentSheetScreen")
             try {
                 sheetState.show()
-                Log.d(TAG_ROOT_NAVIGATION_SCREEN, "sheetState.show() completed successfully")
             } catch (e: Exception) {
-                Log.e(TAG_ROOT_NAVIGATION_SCREEN, "Error showing sheet: ${e.message}", e)
+                // Handle error silently
             }
         }
     }
@@ -130,6 +119,6 @@ fun RootNavigationScreen(viewModel: RootNavigationViewModel) {
 
 // Simple sealed class to track which sheet is open
 sealed class SheetScreen {
-    data class SingleCounter(val projectId: Int? = null) : SheetScreen()
-    data class DoubleCounter(val projectId: Int? = null) : SheetScreen()
+    data class SingleCounter(val projectId: Int?) : SheetScreen()
+    data class DoubleCounter(val projectId: Int?) : SheetScreen()
 }

@@ -1,6 +1,5 @@
 package com.example.stitchcounterv3.feature.library
 
-import android.util.Log
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -29,7 +28,6 @@ import com.example.stitchcounterv3.feature.navigation.SheetScreen
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 
-private const val TAG_LIBRARY_SCREEN = "LibraryScreen"
 
 @RootNavGraph
 @Destination
@@ -47,20 +45,16 @@ fun LibraryScreen(
                     ProjectRow(
                         project = project, 
                         onOpen = { 
-                            Log.d(TAG_LIBRARY_SCREEN, "Opening project: ${project.title} (type: ${project.type}, id: ${project.id})")
                             when (project.type) {
                                 ProjectType.SINGLE -> {
-                                    Log.d(TAG_LIBRARY_SCREEN, "Opening SingleCounter bottom sheet for project: ${project.id}")
                                     rootNavigationViewModel.showBottomSheet(SheetScreen.SingleCounter(project.id))
                                 }
                                 ProjectType.DOUBLE -> {
-                                    Log.d(TAG_LIBRARY_SCREEN, "Opening DoubleCounter bottom sheet for project: ${project.id}")
                                     rootNavigationViewModel.showBottomSheet(SheetScreen.DoubleCounter(project.id))
                                 }
                             }
                         },
                         onDelete = { 
-                            Log.d(TAG_LIBRARY_SCREEN, "Deleting project: ${project.title}")
                             viewModel.delete(project) 
                         }
                     )

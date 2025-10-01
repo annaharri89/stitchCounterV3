@@ -1,6 +1,5 @@
 package com.example.stitchcounterv3.feature.main
 
-import android.util.Log
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -13,7 +12,6 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.stitchcounterv3.feature.navigation.RootNavGraph
 import com.ramcosta.composedestinations.annotation.Destination
 
-private const val TAG_MAIN_SCREEN = "MainScreen"
 
 @RootNavGraph(start = true)
 @Destination
@@ -33,17 +31,15 @@ fun MainScreen(
             Text("Stitch Counter", style = MaterialTheme.typography.headlineMedium)
 
             Button(onClick = {
-                Log.d(TAG_MAIN_SCREEN, "Single Tracker button clicked")
                 // Request SingleCounter bottom sheet (no project ID for new projects)
-                viewModel.showBottomSheet(SheetScreen.SingleCounter())
+                viewModel.showBottomSheet(SheetScreen.SingleCounter(null))
             }) {
                 Text("New Single Tracker")
             }
 
             Button(onClick = {
-                Log.d(TAG_MAIN_SCREEN, "Double Tracker button clicked")
                 // Request DoubleCounter bottom sheet (no project ID for new projects)
-                viewModel.showBottomSheet(SheetScreen.DoubleCounter())
+                viewModel.showBottomSheet(SheetScreen.DoubleCounter(null))
             }) {
                 Text("New Double Tracker")
             }
