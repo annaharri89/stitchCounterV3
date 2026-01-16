@@ -15,6 +15,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.stitchcounterv3.ui.theme.quaternary
 
 @Composable
 fun IncreaseDecreaseButtons(
@@ -40,12 +41,11 @@ fun IncreaseDecreaseButtons(
             // Decrement button
             Button(
                 colors = ButtonDefaults.buttonColors().copy(
-                    containerColor = MaterialTheme.colorScheme.error,
+                    containerColor = MaterialTheme.quaternary,
                     contentColor = Color.White
                 ),
                 modifier = Modifier
                     .weight(1f),
-                    //.aspectRatio(2f),
                 onClick = onDecrement,
                 shape = buttonShape
             ) {

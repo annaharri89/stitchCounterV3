@@ -11,6 +11,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import com.example.stitchcounterv3.ui.theme.onQuaternary
+import com.example.stitchcounterv3.ui.theme.quaternary
 
 @Composable
 fun BottomActionButtons(labelText: String = "Reset",
@@ -23,8 +25,8 @@ fun BottomActionButtons(labelText: String = "Reset",
     ) {
         Button(
             colors = ButtonDefaults.buttonColors(
-                containerColor = MaterialTheme.colorScheme.error,
-                contentColor = Color.White
+                containerColor = MaterialTheme.quaternary,
+                contentColor = MaterialTheme.onQuaternary
             ),
             onClick = { onResetAll.invoke() },
             modifier = Modifier.weight(1f)
