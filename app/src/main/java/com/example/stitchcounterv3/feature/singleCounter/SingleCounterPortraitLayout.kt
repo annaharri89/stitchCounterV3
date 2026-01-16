@@ -54,7 +54,8 @@ fun SingleCounterPortraitLayout(
             onIncrement = actions::increment,
             onDecrement = actions::decrement,
             onAdjustmentClick = actions::changeAdjustment,
-            onReset = actions::resetCount
+            onReset = actions::resetCount,
+            showResetButton = false
         )
         
         Spacer(modifier = Modifier.weight(.5f))

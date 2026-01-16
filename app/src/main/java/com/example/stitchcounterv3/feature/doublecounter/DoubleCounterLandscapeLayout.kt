@@ -85,7 +85,8 @@ fun DoubleCounterLandscapeLayout(
 
         BottomActionButtons(
             onResetAll = actions::resetAll,
-            onSave = actions::save
+            onSave = actions::save,
+            labelText = "Reset All"
         )
     }
 }

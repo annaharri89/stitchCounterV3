@@ -19,6 +19,7 @@ import com.example.stitchcounterv3.domain.model.AdjustmentAmount
 import com.example.stitchcounterv3.domain.model.CounterState
 import com.example.stitchcounterv3.feature.sharedComposables.AdjustmentButtons
 import com.example.stitchcounterv3.feature.sharedComposables.BottomActionButtons
+import com.example.stitchcounterv3.feature.sharedComposables.CounterView
 import com.example.stitchcounterv3.feature.sharedComposables.IncreaseDecreaseButtons
 import com.example.stitchcounterv3.feature.sharedComposables.ResizableText
 import com.example.stitchcounterv3.ui.theme.StitchCounterV3Theme
@@ -28,61 +29,33 @@ fun SingleCounterLandscapeLayout(
     state: SingleCounterUiState,
     actions: SingleCounterActions
 ) {
-    Row(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(24.dp),
-        horizontalArrangement = Arrangement.spacedBy(32.dp),
-        verticalAlignment = Alignment.CenterVertically
+    Column(
+        modifier = Modifier.fillMaxSize().padding(horizontal = 24.dp, vertical = 8.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        // Left side - Project info and controls
-        Column(
+        OutlinedTextField(
+            value = state.title,
+            onValueChange = actions::setTitle,
+            label = { Text("Project Name") },
+            modifier = Modifier.fillMaxWidth()
+        )
+
+        CounterView(
             modifier = Modifier.weight(1f),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            OutlinedTextField(
-                value = state.title,
-                onValueChange = actions::setTitle,
-                label = { Text("Project Name") },
-                modifier = Modifier.fillMaxWidth()
-            )
+            count = state.counterState.count,
+            selectedAdjustmentAmount = state.counterState.adjustment,
+            onIncrement = actions::increment,
+            onDecrement = actions::decrement,
+            onAdjustmentClick = actions::changeAdjustment,
+            onReset = actions::resetCount,
+            showResetButton = false
+        )
 
-            ResizableText(
-                text = state.counterState.count.toString(),
-                modifier = Modifier.weight(1f),
-                heightRatio =  0.8f,
-                widthRatio = 0.4f,
-                minFontSize = 48f,
-                maxFontSize = 300f
-            )
-
-            BottomActionButtons(
-                onResetAll = actions::resetCount,
-                onSave = actions::save
-            )
-        }
-        
-        // Right side - Main counter buttons
-        Column(
-            modifier = Modifier.weight(1f),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            IncreaseDecreaseButtons(
-                onIncrement = actions::increment,
-                onDecrement = actions::decrement,
-                buttonSpacing = 24,
-                buttonShape = RoundedCornerShape(12.dp),
-                incrementFontSize = 60,
-                decrementFontSize = 80
-            )
-
-            AdjustmentButtons(
-                selectedAdjustmentAmount = state.counterState.adjustment,
-                onAdjustmentClick = actions::changeAdjustment,
-            )
-        }
+        BottomActionButtons(
+            onResetAll = actions::resetCount,
+            onSave = actions::save
+        )
     }
 }
 

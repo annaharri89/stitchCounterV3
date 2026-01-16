@@ -36,6 +36,7 @@ fun CounterView(
     buttonShape: RoundedCornerShape = RoundedCornerShape(12.dp),
     incrementFontSize: Int = 50,
     decrementFontSize: Int = 60,
+    showResetButton: Boolean = true,
     ) {
         Column(
             modifier = modifier,
@@ -77,16 +78,19 @@ fun CounterView(
 
             Row(
                 modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = if (!showResetButton) Arrangement.Center else Arrangement.Start
             ) {
-                Button(
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.error,
-                        contentColor = Color.White
-                    ),
-                    onClick = { onReset() },
-                    modifier = Modifier.weight(.5f)
-                ) {
-                    Text("Reset")
+                if (showResetButton) {
+                    Button(
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = MaterialTheme.colorScheme.error,
+                            contentColor = Color.White
+                        ),
+                        onClick = { onReset() },
+                        modifier = Modifier.weight(.5f)
+                    ) {
+                        Text("Reset")
+                    }
                 }
 
                 AdjustmentButtons(

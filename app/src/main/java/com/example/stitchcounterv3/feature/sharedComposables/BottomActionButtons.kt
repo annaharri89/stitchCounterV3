@@ -13,7 +13,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 
 @Composable
-fun BottomActionButtons(onResetAll: () -> Unit,
+fun BottomActionButtons(labelText: String = "Reset",
+                        onResetAll: () -> Unit,
                         onSave: () -> Unit) {
     // Action buttons
     Row(
@@ -28,7 +29,7 @@ fun BottomActionButtons(onResetAll: () -> Unit,
             onClick = { onResetAll.invoke() },
             modifier = Modifier.weight(1f)
         ) {
-            Text("Reset All")
+            Text(labelText)
         }
 
         Button(
