@@ -3,6 +3,7 @@ package com.example.stitchcounterv3.feature.singleCounter
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.stitchcounterv3.domain.model.AdjustmentAmount
+import com.example.stitchcounterv3.domain.model.CounterState
 import com.example.stitchcounterv3.domain.model.Project
 import com.example.stitchcounterv3.domain.model.ProjectType
 import com.example.stitchcounterv3.domain.usecase.GetProject
@@ -18,8 +19,7 @@ import kotlinx.coroutines.launch
 data class SingleCounterUiState(
     val id: Int = 0,
     val title: String = "",
-    val count: Int = 0,
-    val adjustment: AdjustmentAmount = AdjustmentAmount.ONE,
+    val counterState: CounterState = CounterState(),
     val isLoading: Boolean = false,
 )
 
@@ -41,8 +41,10 @@ open class SingleCounterViewModel @Inject constructor(
                     currentState.copy(
                         id = project.id,
                         title = project.title,
-                        count = project.stitchCounterNumber,
-                        adjustment = AdjustmentAmount.entries.find { it.adjustmentAmount == project.stitchAdjustment } ?: AdjustmentAmount.ONE,
+                        counterState = CounterState(
+                            count = project.stitchCounterNumber,
+                            adjustment = AdjustmentAmount.entries.find { it.adjustmentAmount == project.stitchAdjustment } ?: AdjustmentAmount.ONE
+                        ),
                         isLoading = false
                     )
                 }
@@ -57,19 +59,35 @@ open class SingleCounterViewModel @Inject constructor(
     }
 
     override fun changeAdjustment(value: AdjustmentAmount) {
-        _uiState.update { currentState -> currentState.copy(adjustment = value) }
+        _uiState.update { currentState ->
+            currentState.copy(
+                counterState = currentState.counterState.copy(adjustment = value)
+            )
+        }
     }
 
     override fun increment() {
-        _uiState.update { currentState -> currentState.copy(count = currentState.count + currentState.adjustment.adjustmentAmount) }
+        _uiState.update { currentState ->
+            currentState.copy(
+                counterState = currentState.counterState.increment()
+            )
+        }
     }
 
     override fun decrement() {
-        _uiState.update { currentState -> currentState.copy(count = (currentState.count - currentState.adjustment.adjustmentAmount).coerceAtLeast(0)) }
+        _uiState.update { currentState ->
+            currentState.copy(
+                counterState = currentState.counterState.decrement()
+            )
+        }
     }
 
     override fun resetCount() {
-        _uiState.update { currentState -> currentState.copy(count = 0) }
+        _uiState.update { currentState ->
+            currentState.copy(
+                counterState = currentState.counterState.reset()
+            )
+        }
     }
 
     fun resetState() {
@@ -83,8 +101,8 @@ open class SingleCounterViewModel @Inject constructor(
                 id = state.id,
                 type = ProjectType.SINGLE,
                 title = state.title,
-                stitchCounterNumber = state.count,
-                stitchAdjustment = state.adjustment.adjustmentAmount,
+                stitchCounterNumber = state.counterState.count,
+                stitchAdjustment = state.counterState.adjustment.adjustmentAmount,
             )
             val newId = upsertProject(project).toInt()
             if (state.id == 0 && newId > 0) {

@@ -15,6 +15,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.stitchcounterv3.domain.model.AdjustmentAmount
+import com.example.stitchcounterv3.domain.model.CounterState
 import com.example.stitchcounterv3.feature.sharedComposables.BottomActionButtons
 import com.example.stitchcounterv3.feature.sharedComposables.CounterView
 import com.example.stitchcounterv3.feature.sharedComposables.IncreaseDecreaseButtons
@@ -48,8 +49,8 @@ fun SingleCounterPortraitLayout(
 
         CounterView(
             modifier = Modifier.weight(1f),
-            count = state.count,
-            selectedAdjustmentAmount = state.adjustment,
+            count = state.counterState.count,
+            selectedAdjustmentAmount = state.counterState.adjustment,
             onIncrement = actions::increment,
             onDecrement = actions::decrement,
             onAdjustmentClick = actions::changeAdjustment,
@@ -82,8 +83,10 @@ private fun SingleCounterPortraitPreview() {
             SingleCounterPortraitLayout(
                 state = SingleCounterUiState(
                     title = "Sample Project",
-                    count = 42,
-                    adjustment = AdjustmentAmount.FIVE
+                    counterState = CounterState(
+                        count = 42,
+                        adjustment = AdjustmentAmount.FIVE
+                    )
                 ),
                 actions = fakeActions
             )

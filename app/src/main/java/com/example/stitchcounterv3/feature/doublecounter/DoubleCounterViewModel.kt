@@ -3,6 +3,7 @@ package com.example.stitchcounterv3.feature.doublecounter
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.stitchcounterv3.domain.model.AdjustmentAmount
+import com.example.stitchcounterv3.domain.model.CounterState
 import com.example.stitchcounterv3.domain.model.Project
 import com.example.stitchcounterv3.domain.model.ProjectType
 import com.example.stitchcounterv3.domain.usecase.GetProject
@@ -19,13 +20,16 @@ import kotlinx.coroutines.launch
 data class DoubleCounterUiState(
     val id: Int = 0,
     val title: String = "",
-    val stitchCount: Int = 0,
-    val stitchAdjustment: AdjustmentAmount = AdjustmentAmount.ONE,
-    val rowCount: Int = 0,
-    val rowAdjustment: AdjustmentAmount = AdjustmentAmount.ONE,
+    val stitchCounterState: CounterState = CounterState(),
+    val rowCounterState: CounterState = CounterState(),
     val totalRows: Int = 0,
     val isLoading: Boolean = false,
 )
+
+enum class CounterType {
+    STITCH,
+    ROW
+}
 
 @HiltViewModel
 open class DoubleCounterViewModel @Inject constructor(
@@ -46,10 +50,14 @@ open class DoubleCounterViewModel @Inject constructor(
                     currentState.copy(
                         id = project.id,
                         title = project.title,
-                        stitchCount = project.stitchCounterNumber,
-                        stitchAdjustment = AdjustmentAmount.entries.find { it.adjustmentAmount == project.stitchAdjustment } ?: AdjustmentAmount.ONE,
-                        rowCount = project.rowCounterNumber,
-                        rowAdjustment = AdjustmentAmount.entries.find { it.adjustmentAmount == project.rowAdjustment } ?: AdjustmentAmount.ONE,
+                        stitchCounterState = CounterState(
+                            count = project.stitchCounterNumber,
+                            adjustment = AdjustmentAmount.entries.find { it.adjustmentAmount == project.stitchAdjustment } ?: AdjustmentAmount.ONE
+                        ),
+                        rowCounterState = CounterState(
+                            count = project.rowCounterNumber,
+                            adjustment = AdjustmentAmount.entries.find { it.adjustmentAmount == project.rowAdjustment } ?: AdjustmentAmount.ONE
+                        ),
                         totalRows = project.totalRows,
                         isLoading = false
                     )
@@ -60,25 +68,32 @@ open class DoubleCounterViewModel @Inject constructor(
         }
     }
 
-    override fun setTitle(title: String) { _uiState.update { currentState -> currentState.copy(title = title) } }
-    override fun setTotalRows(rows: Int) { _uiState.update { currentState -> currentState.copy(totalRows = rows.coerceAtLeast(0)) } }
-
-    override fun changeStitchAdjustment(value: AdjustmentAmount) { _uiState.update { currentState -> currentState.copy(stitchAdjustment = value) } }//todo lots of repeated code, fix this
-    override fun changeRowAdjustment(value: AdjustmentAmount) { _uiState.update { currentState -> currentState.copy(rowAdjustment = value) } }//todo lots of repeated code, fix this
-
-    override fun incStitch() { _uiState.update { currentState -> currentState.copy(stitchCount = currentState.stitchCount + currentState.stitchAdjustment.adjustmentAmount) } }//todo lots of repeated code, fix this
-    override fun decStitch() { _uiState.update { currentState -> currentState.copy(stitchCount = (currentState.stitchCount - currentState.stitchAdjustment.adjustmentAmount).coerceAtLeast(0)) } }//todo lots of repeated code, fix this
-    override fun resetStitch() { _uiState.update { currentState -> currentState.copy(stitchCount = 0) } }//todo lots of repeated code, fix this
-
-    override fun incRow() {//todo lots of repeated code, fix this
-        val newRow = _uiState.value.rowCount + _uiState.value.rowAdjustment.adjustmentAmount
-        _uiState.update { currentState -> currentState.copy(rowCount = newRow) }
+    override fun setTitle(title: String) { 
+        _uiState.update { currentState -> currentState.copy(title = title) } 
     }
-    override fun decRow() {//todo lots of repeated code, fix this
-        val newRow = (_uiState.value.rowCount - _uiState.value.rowAdjustment.adjustmentAmount).coerceAtLeast(0)
-        _uiState.update { currentState -> currentState.copy(rowCount = newRow) }
+    
+    override fun setTotalRows(rows: Int) { 
+        _uiState.update { currentState -> currentState.copy(totalRows = rows.coerceAtLeast(0)) } 
     }
-    override fun resetRow() { _uiState.update { currentState -> currentState.copy(rowCount = 0) } }//todo lots of repeated code, fix this
+
+    private fun updateCounter(type: CounterType, update: (CounterState) -> CounterState) {
+        _uiState.update { currentState ->
+            when (type) {
+                CounterType.STITCH -> currentState.copy(
+                    stitchCounterState = update(currentState.stitchCounterState)
+                )
+                CounterType.ROW -> currentState.copy(
+                    rowCounterState = update(currentState.rowCounterState)
+                )
+            }
+        }
+    }
+
+    override fun increment(type: CounterType) = updateCounter(type) { it.increment() }
+    override fun decrement(type: CounterType) = updateCounter(type) { it.decrement() }
+    override fun reset(type: CounterType) = updateCounter(type) { it.reset() }
+    override fun changeAdjustment(type: CounterType, value: AdjustmentAmount) = 
+        updateCounter(type) { it.copy(adjustment = value) }
 
     override fun save() {
         viewModelScope.launch {
@@ -87,10 +102,10 @@ open class DoubleCounterViewModel @Inject constructor(
                 id = s.id,
                 type = ProjectType.DOUBLE,
                 title = s.title,
-                stitchCounterNumber = s.stitchCount,
-                stitchAdjustment = s.stitchAdjustment.adjustmentAmount,
-                rowCounterNumber = s.rowCount,
-                rowAdjustment = s.rowAdjustment.adjustmentAmount,
+                stitchCounterNumber = s.stitchCounterState.count,
+                stitchAdjustment = s.stitchCounterState.adjustment.adjustmentAmount,
+                rowCounterNumber = s.rowCounterState.count,
+                rowAdjustment = s.rowCounterState.adjustment.adjustmentAmount,
                 totalRows = s.totalRows,
             )
             val newId = upsertProject(project).toInt()
@@ -111,8 +126,8 @@ open class DoubleCounterViewModel @Inject constructor(
     }
 
     override fun resetAll() {
-        resetStitch()
-        resetRow()
+        reset(CounterType.STITCH)
+        reset(CounterType.ROW)
     }
 }
 

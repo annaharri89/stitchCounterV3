@@ -14,6 +14,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.stitchcounterv3.domain.model.AdjustmentAmount
+import com.example.stitchcounterv3.domain.model.CounterState
+import com.example.stitchcounterv3.feature.doublecounter.CounterType
 import com.example.stitchcounterv3.feature.sharedComposables.BottomActionButtons
 import com.example.stitchcounterv3.feature.sharedComposables.CounterView
 import com.example.stitchcounterv3.ui.theme.StitchCounterV3Theme
@@ -55,24 +57,24 @@ fun DoubleCounterLandscapeLayout(
             CounterView(
                 modifier = Modifier.weight(1f),
                 label = "Stitches",
-                count = state.stitchCount,
-                selectedAdjustmentAmount = state.stitchAdjustment,
-                onIncrement = actions::incStitch,
-                onDecrement = actions::decStitch,
-                onAdjustmentClick = actions::changeStitchAdjustment,
-                onReset = actions::resetStitch
+                count = state.stitchCounterState.count,
+                selectedAdjustmentAmount = state.stitchCounterState.adjustment,
+                onIncrement = { actions.increment(CounterType.STITCH) },
+                onDecrement = { actions.decrement(CounterType.STITCH) },
+                onAdjustmentClick = { actions.changeAdjustment(CounterType.STITCH, it) },
+                onReset = { actions.reset(CounterType.STITCH) }
             )
 
             // Right side - Rows counter
             CounterView(
                 modifier = Modifier.weight(1f),
                 label = "Rows/Rounds",
-                count = state.rowCount,
-                selectedAdjustmentAmount = state.rowAdjustment,
-                onIncrement = actions::incRow,
-                onDecrement = actions::decRow,
-                onAdjustmentClick = actions::changeRowAdjustment,
-                onReset = actions::resetRow
+                count = state.rowCounterState.count,
+                selectedAdjustmentAmount = state.rowCounterState.adjustment,
+                onIncrement = { actions.increment(CounterType.ROW) },
+                onDecrement = { actions.decrement(CounterType.ROW) },
+                onAdjustmentClick = { actions.changeAdjustment(CounterType.ROW, it) },
+                onReset = { actions.reset(CounterType.ROW) }
             )
         }
 
@@ -91,14 +93,10 @@ private fun DoubleCounterLandscapePreview() {
             val fakeActions = object : DoubleCounterActions {
                 override fun setTitle(title: String) {}
                 override fun setTotalRows(rows: Int) {}
-                override fun incStitch() {}
-                override fun decStitch() {}
-                override fun resetStitch() {}
-                override fun changeStitchAdjustment(value: AdjustmentAmount) {}
-                override fun incRow() {}
-                override fun decRow() {}
-                override fun resetRow() {}
-                override fun changeRowAdjustment(value: AdjustmentAmount) {}
+                override fun increment(type: CounterType) {}
+                override fun decrement(type: CounterType) {}
+                override fun reset(type: CounterType) {}
+                override fun changeAdjustment(type: CounterType, value: AdjustmentAmount) {}
                 override fun resetAll() {}
                 override fun save() {}
             }
@@ -106,10 +104,14 @@ private fun DoubleCounterLandscapePreview() {
             DoubleCounterLandscapeLayout(
                 state = DoubleCounterUiState(
                     title = "Sample Project",
-                    stitchCount = 42,
-                    stitchAdjustment = AdjustmentAmount.FIVE,
-                    rowCount = 10,
-                    rowAdjustment = AdjustmentAmount.ONE,
+                    stitchCounterState = CounterState(
+                        count = 42,
+                        adjustment = AdjustmentAmount.FIVE
+                    ),
+                    rowCounterState = CounterState(
+                        count = 10,
+                        adjustment = AdjustmentAmount.ONE
+                    ),
                     totalRows = 20
                 ),
                 actions = fakeActions
