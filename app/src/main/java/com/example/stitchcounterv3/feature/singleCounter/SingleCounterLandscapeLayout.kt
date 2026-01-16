@@ -38,7 +38,9 @@ fun SingleCounterLandscapeLayout(
             value = state.title,
             onValueChange = actions::setTitle,
             label = { Text("Project Name") },
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
+            isError = state.titleError != null,
+            supportingText = state.titleError?.let { { Text(it) } }
         )
 
         CounterView(

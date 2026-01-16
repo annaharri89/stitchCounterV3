@@ -4,21 +4,25 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.stitchcounterv3.domain.model.AdjustmentAmount
 import com.example.stitchcounterv3.domain.model.CounterState
+import com.example.stitchcounterv3.domain.model.DismissalResult
 import com.example.stitchcounterv3.domain.model.Project
 import com.example.stitchcounterv3.domain.model.ProjectType
 import com.example.stitchcounterv3.domain.usecase.GetProject
 import com.example.stitchcounterv3.domain.usecase.UpsertProject
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 data class SingleCounterUiState(
     val id: Int = 0,
     val title: String = "",
+    val titleError: String? = null,
     val counterState: CounterState = CounterState(),
     val isLoading: Boolean = false,
 )
@@ -30,6 +34,9 @@ open class SingleCounterViewModel @Inject constructor(
 ) : ViewModel(), SingleCounterActions {
     private val _uiState = MutableStateFlow(SingleCounterUiState())
     open val uiState: StateFlow<SingleCounterUiState> = _uiState.asStateFlow()
+    
+    private val _dismissalResult = Channel<DismissalResult>(Channel.BUFFERED)
+    val dismissalResult = _dismissalResult.receiveAsFlow()
 
     fun loadProject(projectId: Int?) {
         viewModelScope.launch {
@@ -55,7 +62,23 @@ open class SingleCounterViewModel @Inject constructor(
     }
 
     override fun setTitle(title: String) {
-        _uiState.update { currentState -> currentState.copy(title = title) }
+        _uiState.update { currentState -> 
+            currentState.copy(
+                title = title,
+                titleError = null // Clear error when user types
+            )
+        }
+    }
+    
+    private fun validateTitle(): Boolean {
+        val title = _uiState.value.title.trim()
+        return if (title.isEmpty()) {
+            _uiState.update { it.copy(titleError = "You have to have a title") }
+            false
+        } else {
+            _uiState.update { it.copy(titleError = null) }
+            true
+        }
     }
 
     override fun changeAdjustment(value: AdjustmentAmount) {
@@ -95,12 +118,15 @@ open class SingleCounterViewModel @Inject constructor(
     }
 
     override fun save() {
+        if (!validateTitle()) {
+            return
+        }
         viewModelScope.launch {
             val state = _uiState.value
             val project = Project(
                 id = state.id,
                 type = ProjectType.SINGLE,
-                title = state.title,
+                title = state.title.trim(),
                 stitchCounterNumber = state.counterState.count,
                 stitchAdjustment = state.counterState.adjustment.adjustmentAmount,
             )
@@ -108,6 +134,35 @@ open class SingleCounterViewModel @Inject constructor(
             if (state.id == 0 && newId > 0) {
                 _uiState.update { currentState -> currentState.copy(id = newId) }
             }
+        }
+    }
+    
+    /**
+     * Attempts to dismiss the bottom sheet. Validates title and saves if valid.
+     * Returns true if dismissal is allowed, false if blocked due to validation error.
+     */
+    fun attemptDismissal() {
+        viewModelScope.launch {
+            if (!validateTitle()) {
+                // Show discard dialog instead of blocking with error
+                _dismissalResult.send(DismissalResult.ShowDiscardDialog)
+                return@launch
+            }
+            
+            // Auto-save when dismissing with valid title
+            val state = _uiState.value
+            val project = Project(
+                id = state.id,
+                type = ProjectType.SINGLE,
+                title = state.title.trim(),
+                stitchCounterNumber = state.counterState.count,
+                stitchAdjustment = state.counterState.adjustment.adjustmentAmount,
+            )
+            val newId = upsertProject(project).toInt()
+            if (state.id == 0 && newId > 0) {
+                _uiState.update { currentState -> currentState.copy(id = newId) }
+            }
+            _dismissalResult.send(DismissalResult.Allowed)
         }
     }
 

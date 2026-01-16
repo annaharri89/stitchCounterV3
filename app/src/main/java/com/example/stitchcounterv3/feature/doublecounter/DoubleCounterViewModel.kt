@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.stitchcounterv3.domain.model.AdjustmentAmount
 import com.example.stitchcounterv3.domain.model.CounterState
+import com.example.stitchcounterv3.domain.model.DismissalResult
 import com.example.stitchcounterv3.domain.model.Project
 import com.example.stitchcounterv3.domain.model.ProjectType
 import com.example.stitchcounterv3.domain.usecase.GetProject
@@ -11,15 +12,18 @@ import com.example.stitchcounterv3.domain.usecase.UpsertProject
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 data class DoubleCounterUiState(
     val id: Int = 0,
     val title: String = "",
+    val titleError: String? = null,
     val stitchCounterState: CounterState = CounterState(),
     val rowCounterState: CounterState = CounterState(),
     val totalRows: Int = 0,
@@ -49,6 +53,9 @@ open class DoubleCounterViewModel @Inject constructor(
 
     private val _uiState = MutableStateFlow(DoubleCounterUiState())
     open val uiState: StateFlow<DoubleCounterUiState> = _uiState.asStateFlow()
+    
+    private val _dismissalResult = Channel<DismissalResult>(Channel.BUFFERED)
+    val dismissalResult = _dismissalResult.receiveAsFlow()
 
     fun loadProject(projectId: Int?) {
         viewModelScope.launch {
@@ -79,7 +86,23 @@ open class DoubleCounterViewModel @Inject constructor(
     }
 
     override fun setTitle(title: String) { 
-        _uiState.update { currentState -> currentState.copy(title = title) } 
+        _uiState.update { currentState -> 
+            currentState.copy(
+                title = title,
+                titleError = null // Clear error when user types
+            )
+        } 
+    }
+    
+    private fun validateTitle(): Boolean {
+        val title = _uiState.value.title.trim()
+        return if (title.isEmpty()) {
+            _uiState.update { it.copy(titleError = "You have to have a title") }
+            false
+        } else {
+            _uiState.update { it.copy(titleError = null) }
+            true
+        }
     }
     
     override fun setTotalRows(rows: Int) { 
@@ -106,12 +129,15 @@ open class DoubleCounterViewModel @Inject constructor(
         updateCounter(type) { it.copy(adjustment = value) }
 
     override fun save() {
+        if (!validateTitle()) {
+            return
+        }
         viewModelScope.launch {
             val s = _uiState.value
             val project = Project(
                 id = s.id,
                 type = ProjectType.DOUBLE,
-                title = s.title,
+                title = s.title.trim(),
                 stitchCounterNumber = s.stitchCounterState.count,
                 stitchAdjustment = s.stitchCounterState.adjustment.adjustmentAmount,
                 rowCounterNumber = s.rowCounterState.count,
@@ -122,6 +148,38 @@ open class DoubleCounterViewModel @Inject constructor(
             if (s.id == 0 && newId > 0) {
                 _uiState.update { currentState -> currentState.copy(id = newId) }
             }
+        }
+    }
+    
+    /**
+     * Attempts to dismiss the bottom sheet. Validates title and saves if valid.
+     * Returns true if dismissal is allowed, false if blocked due to validation error.
+     */
+    fun attemptDismissal() {
+        viewModelScope.launch {
+            if (!validateTitle()) {
+                // Show discard dialog instead of blocking with error
+                _dismissalResult.send(DismissalResult.ShowDiscardDialog)
+                return@launch
+            }
+            
+            // Auto-save when dismissing with valid title
+            val s = _uiState.value
+            val project = Project(
+                id = s.id,
+                type = ProjectType.DOUBLE,
+                title = s.title.trim(),
+                stitchCounterNumber = s.stitchCounterState.count,
+                stitchAdjustment = s.stitchCounterState.adjustment.adjustmentAmount,
+                rowCounterNumber = s.rowCounterState.count,
+                rowAdjustment = s.rowCounterState.adjustment.adjustmentAmount,
+                totalRows = s.totalRows,
+            )
+            val newId = upsertProject(project).toInt()
+            if (s.id == 0 && newId > 0) {
+                _uiState.update { currentState -> currentState.copy(id = newId) }
+            }
+            _dismissalResult.send(DismissalResult.Allowed)
         }
     }
 
