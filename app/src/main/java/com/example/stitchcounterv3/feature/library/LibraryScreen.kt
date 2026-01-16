@@ -20,57 +20,43 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.example.stitchcounterv3.domain.model.NavigationEvent
 import com.example.stitchcounterv3.domain.model.Project
-import com.example.stitchcounterv3.feature.navigation.BottomNavGraph
+import com.example.stitchcounterv3.domain.model.ProjectType
+import com.example.stitchcounterv3.feature.navigation.RootNavGraph
+import com.example.stitchcounterv3.feature.navigation.RootNavigationViewModel
+import com.example.stitchcounterv3.feature.navigation.SheetScreen
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
-import com.ramcosta.composedestinations.navigation.navigate
-import com.ramcosta.composedestinations.navigation.popBackStack
 
-@BottomNavGraph
+
+@RootNavGraph
 @Destination
 @Composable
 fun LibraryScreen(
     navigator: DestinationsNavigator,
-    viewModel: LibraryViewModel = hiltViewModel()
+    viewModel: LibraryViewModel = hiltViewModel(),
+    rootNavigationViewModel: RootNavigationViewModel
 ) {
-    // Collect navigation events and handle them
-    LaunchedEffect(viewModel) {
-        viewModel.navigationEvents.collect { event ->
-            when (event) {
-                is NavigationEvent.NavigateToScreen -> {
-                    navigator.navigate(event.destination)
-                }
-                is NavigationEvent.PopBackStack -> {
-                    navigator.popBackStack()
-                }
-                is NavigationEvent.NavigateUp -> {
-                    navigator.popBackStack()
-                }
-            }
-        }
-    }
-
     val projects by viewModel.projects.collectAsState()
     Surface(modifier = Modifier.fillMaxSize()) {
         Column(modifier = Modifier.padding(16.dp)) {
-            // Add buttons to create new projects
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                Button(onClick = { viewModel.navigateToNewSingleCounter() }) {
-                    Text("New Basic Counter")
-                }
-                Button(onClick = { viewModel.navigateToNewDoubleCounter() }) {
-                    Text("New Advanced Counter")
-                }
-            }
-            
             LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 items(projects) { project ->
                     ProjectRow(
                         project = project, 
-                        onOpen = { viewModel.navigateToEditProject(project) }, 
-                        onDelete = { viewModel.delete(project) }
+                        onOpen = { 
+                            when (project.type) {
+                                ProjectType.SINGLE -> {
+                                    rootNavigationViewModel.showBottomSheet(SheetScreen.SingleCounter(project.id))
+                                }
+                                ProjectType.DOUBLE -> {
+                                    rootNavigationViewModel.showBottomSheet(SheetScreen.DoubleCounter(project.id))
+                                }
+                            }
+                        },
+                        onDelete = { 
+                            viewModel.delete(project) 
+                        }
                     )
                     Divider()
                 }
@@ -90,7 +76,7 @@ private fun ProjectRow(project: Project, onOpen: () -> Unit, onDelete: () -> Uni
     ) {
         Column {
             Text(project.title.ifBlank { "Untitled" })
-            Text("Type: ${'$'}{project.type}")
+            Text("Type: ${project.type}")
         }
         Button(onClick = onDelete) { Text("Delete") }
     }

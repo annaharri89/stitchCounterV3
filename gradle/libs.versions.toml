@@ -16,6 +16,8 @@ lifecycle = "2.8.3"
 navCompose = "2.7.7"
 hiltNavigationCompose = "1.2.0"
 datastore = "1.0.0"
+materialNavigation = "1.2.1"
+materialIconsExtended = "1.7.4"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -45,6 +47,8 @@ compose-destinations-core = { group = "io.github.raamcosta.compose-destinations"
 compose-destinations-animations-core = { group = "io.github.raamcosta.compose-destinations", name = "animations-core", version.ref = "destinations" }
 compose-destinations-ksp = { group = "io.github.raamcosta.compose-destinations", name = "ksp", version.ref = "destinations" }
 androidx-datastore-preferences = { group = "androidx.datastore", name = "datastore-preferences", version.ref = "datastore" }
+androidx-material-navigation = { group = "androidx.compose.material3", name = "material-navigation", version.ref = "materialNavigation" }
+androidx-material-icons-extended = { group = "androidx.compose.material", name = "material-icons-extended", version.ref = "materialIconsExtended" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

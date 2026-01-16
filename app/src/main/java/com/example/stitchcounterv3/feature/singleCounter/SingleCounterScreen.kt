@@ -1,4 +1,4 @@
-package com.example.stitchcounterv3.feature.doublecounter
+package com.example.stitchcounterv3.feature.singleCounter
 
 import androidx.compose.foundation.layout.height
 import androidx.compose.material3.Surface
@@ -15,21 +15,22 @@ import com.example.stitchcounterv3.feature.sharedComposables.AdaptiveLayout
 import com.ramcosta.composedestinations.annotation.Destination
 
 /**
- * Double Counter Screen - Material 3 Bottom Sheet Implementation
+ * Single Counter Screen - Material 3 Bottom Sheet Implementation
  * 
  * This screen is displayed as a Material 3 bottom sheet that slides up from the bottom
  * of the screen. It maintains all original functionality while providing a modern bottom sheet UX.
- * Perfect for tracking both stitches and rows/rounds in knitting projects.
  * The bottom sheet is managed by the navigation system in RootNavigationScreen.
  */
 
 @RootNavGraph
 @Destination
 @Composable
-fun DoubleCounterScreen(
+fun SingleCounterScreen(
     projectId: Int? = null,
-    viewModel: DoubleCounterViewModel = hiltViewModel()
+    viewModel: SingleCounterViewModel = hiltViewModel()
 ) {
+    
+    
     LaunchedEffect(projectId) {
         projectId?.let {
             viewModel.loadProject(projectId)
@@ -37,7 +38,7 @@ fun DoubleCounterScreen(
             viewModel.resetState()
         }
     }
-
+    
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     
     val configuration = LocalConfiguration.current
@@ -49,19 +50,11 @@ fun DoubleCounterScreen(
     ) {
         AdaptiveLayout(
             portraitContent = {
-                DoubleCounterPortraitLayout(
-                    state = state,
-                    actions = viewModel
-                )
+                SingleCounterPortraitLayout(state, actions = viewModel)
             },
             landscapeContent = {
-                DoubleCounterLandscapeLayout(
-                    state = state,
-                    actions = viewModel
-                )
+                SingleCounterLandscapeLayout(state, actions = viewModel)
             }
         )
     }
 }
-
-

@@ -1,21 +1,11 @@
 package com.example.stitchcounterv3.ui.theme
 
-import android.app.Activity
-import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
-import androidx.compose.material3.dynamicDarkColorScheme
-import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Brush
 import com.example.stitchcounterv3.domain.model.AppTheme
 import com.example.stitchcounterv3.feature.theme.ThemeManager
 
@@ -25,6 +15,11 @@ fun seaCottageLightColors() = lightColorScheme(
     secondary = SeaCottageMint40,
     tertiary = SeaCottageWhaleLight40,
     primaryContainer = SeaCottagePrimaryContainer40,
+    error = SeaCottageWhaleDark40,
+    onError = Color.White,
+    onPrimary = Color.White,
+    onSecondary = Color.White,
+    onTertiary = Color.White
 )
 
 
@@ -33,14 +28,22 @@ fun seaCottageDarkColors() = darkColorScheme(
     secondary = SeaCottageMint80,
     tertiary = SeaCottageWhaleLight80,
     primaryContainer = SeaCottagePrimaryContainer80,
+    error = SeaCottageWhaleDark80,
+    onPrimary = Color.Black,
+    onSecondary = Color.Black,
+    onTertiary = Color.White,
+    onError = Color.White
 )
 
 fun retroSummerLightColors() = lightColorScheme(
     primary =  RetroSummerCactus40 ,
     secondary = RetroSummerSun40,
     tertiary = RetroSummerOrangeLight40,
-    onTertiary = RetroSummerSun40,
+    onTertiary = Color.White,
     primaryContainer = RetroSummerPrimaryContainer40,
+    error = RetroSummerOrangeDark40,
+    onPrimary = Color.White,
+    onSecondary = Color.White
 )
 
 fun retroSummerDarkColors() = darkColorScheme(
@@ -48,6 +51,10 @@ fun retroSummerDarkColors() = darkColorScheme(
     secondary = RetroSummerSun80,
     tertiary = RetroSummerOrangeLight80,
     primaryContainer = RetroSummerPrimaryContainer80,
+    error = RetroSummerOrangeDark80,
+    onPrimary = Color.White,
+    onSecondary = Color.Black,
+    onTertiary = Color.White
 )
 
 fun purpleLightColors() = lightColorScheme(
@@ -55,6 +62,10 @@ fun purpleLightColors() = lightColorScheme(
     secondary = PurpleGrey40,
     tertiary = Pink40,
     primaryContainer = PurplePrimaryContainer40,
+    error = PurpleViolet40,
+    onPrimary = Color.White,
+    onSecondary = Color.White,
+    onTertiary = Color.White
 )
 
 fun purpleDarkColors() = darkColorScheme(
@@ -62,6 +73,10 @@ fun purpleDarkColors() = darkColorScheme(
     secondary = PurpleGrey80,
     tertiary = Pink80,
     primaryContainer = PurplePrimaryContainer80,
+    error = PurpleViolet80,
+    onPrimary = Color.White,
+    onSecondary = Color.White,
+    onTertiary = Color.White
 )
 
 

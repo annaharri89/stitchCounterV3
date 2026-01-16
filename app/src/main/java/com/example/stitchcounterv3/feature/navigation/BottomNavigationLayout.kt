@@ -1,5 +1,9 @@
 package com.example.stitchcounterv3.feature.navigation
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Icon
@@ -10,44 +14,38 @@ import androidx.compose.material3.NavigationBarItemColors
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavHostController
+import com.example.stitchcounterv3.feature.NavGraphs
 import com.example.stitchcounterv3.feature.destinations.LibraryScreenDestination
 import com.example.stitchcounterv3.feature.destinations.MainScreenDestination
 import com.example.stitchcounterv3.feature.destinations.SettingsScreenDestination
 import com.ramcosta.composedestinations.DestinationsNavHost
-import com.example.stitchcounterv3.feature.NavGraphs
-import com.ramcosta.composedestinations.annotation.Destination
+import com.ramcosta.composedestinations.navigation.navigate
 
-@RootNavGraph(start = true)
-@Destination
+
 @Composable
-fun BottomNavigationScreen(
-    viewModel: BottomNavigationViewModel = hiltViewModel()
+fun BottomNavigationLayout(
+    selectedTab: BottomNavTab,
+    onTabSelected: (BottomNavTab) -> Unit,
+    navController: NavHostController
 ) {
-    val selectedTab by viewModel.selectedTab.collectAsState()
-    
-    Scaffold(
-        bottomBar = {
-            BottomNavigationBar(
-                selectedTab = selectedTab,
-                onTabSelected = viewModel::selectTab
-            )
-        }
-    ) { paddingValues ->
-        DestinationsNavHost(
-            navGraph = NavGraphs.bottom,
-            startRoute = when (selectedTab) {
-                BottomNavTab.HOME -> MainScreenDestination
-                BottomNavTab.LIBRARY -> LibraryScreenDestination
-                BottomNavTab.SETTINGS -> SettingsScreenDestination
-            },
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
+    AnimatedVisibility(
+        visible = true,
+        enter = slideInVertically(
+            initialOffsetY = { fullHeight -> fullHeight },
+            animationSpec = tween(durationMillis = AnimationConstants.NAVIGATION_ANIMATION_DURATION)
+        ),
+        exit = slideOutVertically(
+            targetOffsetY = { fullHeight -> fullHeight },
+            animationSpec = tween(durationMillis = AnimationConstants.NAVIGATION_ANIMATION_DURATION)
+        )
+    ) {
+        BottomNavigationBar(
+            selectedTab = selectedTab,
+            navController = navController,
+            onTabSelected = onTabSelected
         )
     }
 }
@@ -55,13 +53,29 @@ fun BottomNavigationScreen(
 @Composable
 private fun BottomNavigationBar(
     selectedTab: BottomNavTab,
+    navController: NavHostController,
     onTabSelected: (BottomNavTab) -> Unit
 ) {
     NavigationBar {
         BottomNavTab.entries.forEach { tab ->
             NavigationBarItem(
                 selected = selectedTab == tab,
-                onClick = { onTabSelected(tab) },
+                onClick = {
+                    onTabSelected(tab)
+                    val destination = when(tab) {//todo repeatedCode
+                        BottomNavTab.HOME -> MainScreenDestination
+                        BottomNavTab.LIBRARY -> LibraryScreenDestination
+                        BottomNavTab.SETTINGS -> SettingsScreenDestination
+                    }
+                    navController.navigate(destination) {
+                        // Avoid building up a huge stack
+                        popUpTo(navController.graph.startDestinationId) {
+                            saveState = true
+                        }
+                        launchSingleTop = true
+                        restoreState = true
+                    }
+                },
                 icon = {
                     Icon(
                         imageVector = tab.icon,

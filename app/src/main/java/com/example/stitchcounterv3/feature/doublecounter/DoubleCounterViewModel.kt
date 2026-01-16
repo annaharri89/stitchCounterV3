@@ -2,123 +2,142 @@ package com.example.stitchcounterv3.feature.doublecounter
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.stitchcounterv3.domain.model.NavigationEvent
+import com.example.stitchcounterv3.domain.model.AdjustmentAmount
+import com.example.stitchcounterv3.domain.model.CounterState
 import com.example.stitchcounterv3.domain.model.Project
 import com.example.stitchcounterv3.domain.model.ProjectType
 import com.example.stitchcounterv3.domain.usecase.GetProject
 import com.example.stitchcounterv3.domain.usecase.UpsertProject
+import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
-import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.receiveAsFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 data class DoubleCounterUiState(
     val id: Int = 0,
     val title: String = "",
-    val stitchCount: Int = 0,
-    val stitchAdjustment: Int = 1,
-    val rowCount: Int = 0,
-    val rowAdjustment: Int = 1,
+    val stitchCounterState: CounterState = CounterState(),
+    val rowCounterState: CounterState = CounterState(),
     val totalRows: Int = 0,
     val isLoading: Boolean = false,
-)
+) {
+    /**
+     * Calculated progress for row completion (0f to 1f).
+     * Returns null if totalRows is not set (0), indicating progress should not be shown.
+     */
+    val rowProgress: Float? = if (totalRows > 0) {
+        (rowCounterState.count.toFloat() / totalRows.toFloat()).coerceIn(0f, 1f)
+    } else {
+        null
+    }
+}
+
+enum class CounterType {
+    STITCH,
+    ROW
+}
 
 @HiltViewModel
 open class DoubleCounterViewModel @Inject constructor(
     private val getProject: GetProject,
     private val upsertProject: UpsertProject,
-) : ViewModel() {
+) : ViewModel(), DoubleCounterActions {
+
     private val _uiState = MutableStateFlow(DoubleCounterUiState())
     open val uiState: StateFlow<DoubleCounterUiState> = _uiState.asStateFlow()
 
-    // Channel for one-time navigation events
-    private val _navigationEvents = Channel<NavigationEvent>(Channel.UNLIMITED)
-    val navigationEvents: Flow<NavigationEvent> = _navigationEvents.receiveAsFlow()
-
-    fun load(projectId: Int?) {
+    fun loadProject(projectId: Int?) {
         viewModelScope.launch {
             if (projectId == null || projectId == 0) return@launch
-            _uiState.value = _uiState.value.copy(isLoading = true)
+            _uiState.update { currentState -> currentState.copy(isLoading = true) }
             val project = getProject(projectId)
             if (project != null) {
-                _uiState.value = _uiState.value.copy(
-                    id = project.id,
-                    title = project.title,
-                    stitchCount = project.stitchCounterNumber,
-                    stitchAdjustment = project.stitchAdjustment,
-                    rowCount = project.rowCounterNumber,
-                    rowAdjustment = project.rowAdjustment,
-                    totalRows = project.totalRows,
-                    isLoading = false
-                )
+                _uiState.update { currentState ->
+                    currentState.copy(
+                        id = project.id,
+                        title = project.title,
+                        stitchCounterState = CounterState(
+                            count = project.stitchCounterNumber,
+                            adjustment = AdjustmentAmount.entries.find { it.adjustmentAmount == project.stitchAdjustment } ?: AdjustmentAmount.ONE
+                        ),
+                        rowCounterState = CounterState(
+                            count = project.rowCounterNumber,
+                            adjustment = AdjustmentAmount.entries.find { it.adjustmentAmount == project.rowAdjustment } ?: AdjustmentAmount.ONE
+                        ),
+                        totalRows = project.totalRows,
+                        isLoading = false
+                    )
+                }
             } else {
-                _uiState.value = _uiState.value.copy(isLoading = false)
+                _uiState.update { currentState -> currentState.copy(isLoading = false) }
             }
         }
     }
 
-    fun setTitle(title: String) { _uiState.value = _uiState.value.copy(title = title) }
-    fun setTotalRows(rows: Int) { _uiState.value = _uiState.value.copy(totalRows = rows.coerceAtLeast(0)) }
-
-    fun changeStitchAdjustment(value: Int) { _uiState.value = _uiState.value.copy(stitchAdjustment = value) }
-    fun changeRowAdjustment(value: Int) { _uiState.value = _uiState.value.copy(rowAdjustment = value) }
-
-    fun incStitch() { _uiState.value = _uiState.value.copy(stitchCount = _uiState.value.stitchCount + _uiState.value.stitchAdjustment) }
-    fun decStitch() { _uiState.value = _uiState.value.copy(stitchCount = (_uiState.value.stitchCount - _uiState.value.stitchAdjustment).coerceAtLeast(0)) }
-    fun resetStitch() { _uiState.value = _uiState.value.copy(stitchCount = 0) }
-
-    fun incRow() {
-        val newRow = _uiState.value.rowCount + _uiState.value.rowAdjustment
-        _uiState.value = _uiState.value.copy(rowCount = newRow)
+    override fun setTitle(title: String) { 
+        _uiState.update { currentState -> currentState.copy(title = title) } 
     }
-    fun decRow() {
-        val newRow = (_uiState.value.rowCount - _uiState.value.rowAdjustment).coerceAtLeast(0)
-        _uiState.value = _uiState.value.copy(rowCount = newRow)
+    
+    override fun setTotalRows(rows: Int) { 
+        _uiState.update { currentState -> currentState.copy(totalRows = rows.coerceAtLeast(0)) } 
     }
-    fun resetRow() { _uiState.value = _uiState.value.copy(rowCount = 0) }
 
-    fun save() {
+    private fun updateCounter(type: CounterType, update: (CounterState) -> CounterState) {
+        _uiState.update { currentState ->
+            when (type) {
+                CounterType.STITCH -> currentState.copy(
+                    stitchCounterState = update(currentState.stitchCounterState)
+                )
+                CounterType.ROW -> currentState.copy(
+                    rowCounterState = update(currentState.rowCounterState)
+                )
+            }
+        }
+    }
+
+    override fun increment(type: CounterType) = updateCounter(type) { it.increment() }
+    override fun decrement(type: CounterType) = updateCounter(type) { it.decrement() }
+    override fun reset(type: CounterType) = updateCounter(type) { it.reset() }
+    override fun changeAdjustment(type: CounterType, value: AdjustmentAmount) = 
+        updateCounter(type) { it.copy(adjustment = value) }
+
+    override fun save() {
         viewModelScope.launch {
             val s = _uiState.value
             val project = Project(
                 id = s.id,
                 type = ProjectType.DOUBLE,
                 title = s.title,
-                stitchCounterNumber = s.stitchCount,
-                stitchAdjustment = s.stitchAdjustment,
-                rowCounterNumber = s.rowCount,
-                rowAdjustment = s.rowAdjustment,
+                stitchCounterNumber = s.stitchCounterState.count,
+                stitchAdjustment = s.stitchCounterState.adjustment.adjustmentAmount,
+                rowCounterNumber = s.rowCounterState.count,
+                rowAdjustment = s.rowCounterState.adjustment.adjustmentAmount,
                 totalRows = s.totalRows,
             )
             val newId = upsertProject(project).toInt()
             if (s.id == 0 && newId > 0) {
-                _uiState.value = _uiState.value.copy(id = newId)
+                _uiState.update { currentState -> currentState.copy(id = newId) }
             }
         }
     }
 
     // Navigate back to main screen after saving
-    fun saveAndGoBack() {
+    fun saveAndGoBack(navigator: DestinationsNavigator) {//todo I don't think I need this at all once I have it save on back swipe
         save()
-        viewModelScope.launch {
-            _navigationEvents.send(NavigationEvent.PopBackStack)
-        }
+        navigator.popBackStack()
     }
-    
-    // Navigate to library screen
-    fun goToLibrary() {
-        viewModelScope.launch {
-            _navigationEvents.send(
-                NavigationEvent.NavigateToScreen(
-                    com.example.stitchcounterv3.feature.destinations.LibraryScreenDestination()
-                )
-            )
-        }
+
+    fun resetState() {
+        _uiState.update { _ -> DoubleCounterUiState() }
+    }
+
+    override fun resetAll() {
+        reset(CounterType.STITCH)
+        reset(CounterType.ROW)
     }
 }
 

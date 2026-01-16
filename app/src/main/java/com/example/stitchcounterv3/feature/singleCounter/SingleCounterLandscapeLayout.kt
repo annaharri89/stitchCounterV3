@@ -1,0 +1,88 @@
+package com.example.stitchcounterv3.feature.singleCounter
+
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import com.example.stitchcounterv3.domain.model.AdjustmentAmount
+import com.example.stitchcounterv3.domain.model.CounterState
+import com.example.stitchcounterv3.feature.sharedComposables.AdjustmentButtons
+import com.example.stitchcounterv3.feature.sharedComposables.BottomActionButtons
+import com.example.stitchcounterv3.feature.sharedComposables.CounterView
+import com.example.stitchcounterv3.feature.sharedComposables.IncreaseDecreaseButtons
+import com.example.stitchcounterv3.feature.sharedComposables.ResizableText
+import com.example.stitchcounterv3.ui.theme.StitchCounterV3Theme
+
+@Composable
+fun SingleCounterLandscapeLayout(
+    state: SingleCounterUiState,
+    actions: SingleCounterActions
+) {
+    Column(
+        modifier = Modifier.fillMaxSize().padding(horizontal = 24.dp, vertical = 8.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        OutlinedTextField(
+            value = state.title,
+            onValueChange = actions::setTitle,
+            label = { Text("Project Name") },
+            modifier = Modifier.fillMaxWidth()
+        )
+
+        CounterView(
+            modifier = Modifier.weight(1f),
+            count = state.counterState.count,
+            selectedAdjustmentAmount = state.counterState.adjustment,
+            onIncrement = actions::increment,
+            onDecrement = actions::decrement,
+            onAdjustmentClick = actions::changeAdjustment,
+            onReset = actions::resetCount,
+            showResetButton = false
+        )
+
+        BottomActionButtons(
+            onResetAll = actions::resetCount,
+            onSave = actions::save
+        )
+    }
+}
+
+@Preview
+@Composable
+private fun SingleCounterLandscapeScreenPreview() {
+    StitchCounterV3Theme {
+        Surface(modifier = Modifier.fillMaxSize()) {
+            val fakeActions = object : SingleCounterActions {
+                override fun setTitle(title: String) {}
+                override fun increment() {}
+                override fun decrement() {}
+                override fun resetCount() {}
+                override fun changeAdjustment(value: AdjustmentAmount) {}
+                override fun save() {}
+            }
+            
+            SingleCounterLandscapeLayout(
+                state = SingleCounterUiState(
+                    title = "Sample Project",
+                    counterState = CounterState(
+                        count = 42,
+                        adjustment = AdjustmentAmount.FIVE
+                    )
+                ),
+                actions = fakeActions
+            )
+        }
+    }
+}
