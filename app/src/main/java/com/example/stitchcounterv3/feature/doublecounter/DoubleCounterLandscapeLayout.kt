@@ -20,13 +20,16 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.stitchcounterv3.domain.model.AdjustmentAmount
+import com.example.stitchcounterv3.feature.sharedComposables.BottomActionButtons
 import com.example.stitchcounterv3.feature.sharedComposables.CounterView
 import com.example.stitchcounterv3.ui.theme.StitchCounterV3Theme
 
 @Composable
 fun DoubleCounterLandscapeLayout(
     state: DoubleCounterUiState,
-    viewModel: DoubleCounterViewModel
+    viewModel: DoubleCounterViewModel,
+    onResetAll: () -> Unit,
+    onSave: () -> Unit
 ) {
     Column(modifier = Modifier
             .fillMaxSize()
@@ -83,29 +86,10 @@ fun DoubleCounterLandscapeLayout(
             )
         }
 
-        // Bottom action buttons - positioned at the bottom of the screen
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            Button(
-                onClick = { viewModel.save() },
-                modifier = Modifier.weight(1f)
-            ) {
-                Text("Save")
-            }
-
-            Button(
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.error,
-                    contentColor = Color.White
-                ),
-                onClick = { viewModel.resetStitch(); viewModel.resetRow() },
-                modifier = Modifier.weight(1f)
-            ) {
-                Text("Reset All")
-            }
-        }
+        BottomActionButtons(
+            onResetAll = onResetAll,
+            onSave = onSave
+        )
     }
 }
 
