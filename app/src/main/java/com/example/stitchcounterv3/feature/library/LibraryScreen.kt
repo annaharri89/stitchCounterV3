@@ -1,23 +1,65 @@
 package com.example.stitchcounterv3.feature.library
 
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectHorizontalDragGestures
+import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.Button
-import androidx.compose.material3.Divider
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.Numbers
+import androidx.compose.material.icons.filled.SelectAll
+import androidx.compose.material.icons.filled.ViewList
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Checkbox
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.stitchcounterv3.domain.model.Project
@@ -27,7 +69,7 @@ import com.example.stitchcounterv3.feature.navigation.RootNavigationViewModel
 import com.example.stitchcounterv3.feature.navigation.SheetScreen
 import com.example.stitchcounterv3.feature.sharedComposables.RowProgressIndicator
 import com.ramcosta.composedestinations.annotation.Destination
-import com.ramcosta.composedestinations.navigation.DestinationsNavigator
+import kotlin.math.roundToInt
 
 
 @RootNavGraph
@@ -38,27 +80,355 @@ fun LibraryScreen(
     rootNavigationViewModel: RootNavigationViewModel
 ) {
     val projects by viewModel.projects.collectAsState()
-    Surface(modifier = Modifier.fillMaxSize()) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+    val uiState by viewModel.uiState.collectAsState()
+
+    Scaffold(
+        topBar = {
+            if (uiState.isMultiSelectMode) {
+                MultiSelectTopBar(
+                    selectedCount = uiState.selectedProjectIds.size,
+                    totalCount = projects.size,
+                    onSelectAll = { viewModel.selectAllProjects() },
+                    onClearSelection = { viewModel.clearSelection() },
+                    onDelete = { viewModel.requestBulkDelete() },
+                    onCancel = { viewModel.toggleMultiSelectMode() }
+                )
+            } else {
+                LibraryTopBar(
+                    onEnterMultiSelect = { viewModel.toggleMultiSelectMode() }
+                )
+            }
+        }
+    ) { paddingValues ->
+        Surface(modifier = Modifier.fillMaxSize()) {
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues)
+                    .padding(horizontal = 16.dp, vertical = 8.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
                 items(projects) { project ->
-                    ProjectRow(
-                        project = project, 
+                    SwipeableProjectRow(
+                        project = project,
+                        isSelected = uiState.selectedProjectIds.contains(project.id),
+                        isMultiSelectMode = uiState.isMultiSelectMode,
                         onOpen = { 
-                            when (project.type) {
-                                ProjectType.SINGLE -> {
-                                    rootNavigationViewModel.showBottomSheet(SheetScreen.SingleCounter(project.id))
-                                }
-                                ProjectType.DOUBLE -> {
-                                    rootNavigationViewModel.showBottomSheet(SheetScreen.DoubleCounter(project.id))
+                            if (!uiState.isMultiSelectMode) {
+                                when (project.type) {
+                                    ProjectType.SINGLE -> {
+                                        rootNavigationViewModel.showBottomSheet(SheetScreen.SingleCounter(project.id))
+                                    }
+                                    ProjectType.DOUBLE -> {
+                                        rootNavigationViewModel.showBottomSheet(SheetScreen.DoubleCounter(project.id))
+                                    }
                                 }
                             }
                         },
-                        onDelete = { 
-                            viewModel.delete(project) 
+                        onSelect = { viewModel.toggleProjectSelection(project.id) },
+                        onDelete = { viewModel.requestDelete(project) },
+                        onToggleMultiSelect = { viewModel.toggleMultiSelectMode() }
+                    )
+                }
+            }
+        }
+    }
+
+    // Confirmation dialog
+    if (uiState.showDeleteConfirmation) {
+        DeleteConfirmationDialog(
+            projectCount = uiState.projectsToDelete.size,
+            onConfirm = { viewModel.confirmDelete() },
+            onDismiss = { viewModel.cancelDelete() }
+        )
+    }
+}
+
+@Composable
+private fun SwipeableProjectRow(
+    project: Project,
+    isSelected: Boolean,
+    isMultiSelectMode: Boolean,
+    onOpen: () -> Unit,
+    onSelect: () -> Unit,
+    onDelete: () -> Unit,
+    onToggleMultiSelect: () -> Unit
+) {
+    val swipeThreshold = 80.dp
+    val density = LocalDensity.current
+    val swipeThresholdPx = with(density) { swipeThreshold.toPx() }
+    
+    var offsetX by remember { mutableFloatStateOf(0f) }
+    val animatedOffsetX by animateFloatAsState(
+        targetValue = offsetX,
+        animationSpec = tween(durationMillis = 300),
+        label = "swipe_offset"
+    )
+
+    // Reset offset when entering multi-select mode
+    LaunchedEffect(isMultiSelectMode) {
+        if (isMultiSelectMode) {
+            offsetX = 0f
+        }
+    }
+
+    Box(
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        // Delete action background (revealed when swiped) - only show when not in multi-select mode
+        if (!isMultiSelectMode) {
+            Box(
+                modifier = Modifier
+                    .fillMaxHeight()
+                    .width(swipeThreshold)
+                    .align(Alignment.CenterEnd)
+                    .background(
+                        MaterialTheme.colorScheme.error,
+                        RoundedCornerShape(16.dp)
+                    )
+                    .clickable {
+                        if (offsetX < -swipeThresholdPx / 2) {
+                            onDelete()
+                            offsetX = 0f
+                        }
+                    }
+                    .padding(16.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Delete,
+                    contentDescription = "Delete",
+                    tint = MaterialTheme.colorScheme.onError,
+                    modifier = Modifier.size(24.dp)
+                )
+            }
+        }
+
+        // Main card content
+        ProjectRow(
+            project = project,
+            isSelected = isSelected,
+            isMultiSelectMode = isMultiSelectMode,
+            swipeOffset = animatedOffsetX,
+            onOpen = {
+                // Reset swipe offset when opening (if not swiped)
+                if (offsetX == 0f) {
+                    onOpen()
+                } else {
+                    offsetX = 0f
+                }
+            },
+            onSelect = {
+                // Reset swipe offset when selecting
+                offsetX = 0f
+                onSelect()
+            },
+            onDelete = onDelete,
+            onToggleMultiSelect = onToggleMultiSelect,
+            onResetSwipe = { offsetX = 0f },
+            modifier = Modifier
+                .offset { IntOffset(animatedOffsetX.roundToInt(), 0) }
+                .pointerInput(project.id, isMultiSelectMode) {
+                    if (!isMultiSelectMode) {
+                        detectHorizontalDragGestures(
+                            onDragEnd = {
+                                // Only snap back if not fully swiped - don't auto-trigger delete
+                                if (offsetX >= -swipeThresholdPx / 2) {
+                                    offsetX = 0f
+                                }
+                                // If fully swiped, keep it open - user can click delete area or tap card to reset
+                            }
+                        ) { change, dragAmount ->
+                            val newOffset = (offsetX + dragAmount).coerceIn(-swipeThresholdPx, 0f)
+                            offsetX = newOffset
+                        }
+                    }
+                }
+        )
+    }
+}
+
+@Composable
+private fun ProjectRow(
+    project: Project,
+    isSelected: Boolean,
+    isMultiSelectMode: Boolean,
+    swipeOffset: Float = 0f,
+    onOpen: () -> Unit,
+    onSelect: () -> Unit,
+    onDelete: () -> Unit,
+    onToggleMultiSelect: () -> Unit,
+    onResetSwipe: () -> Unit = {},
+    modifier: Modifier = Modifier
+) {
+    val projectIcon: ImageVector = when (project.type) {
+        ProjectType.SINGLE -> Icons.Default.Numbers
+        ProjectType.DOUBLE -> Icons.Default.ViewList
+    }
+    
+    val rowProgress: Float? = if (project.totalRows > 0) {
+        (project.rowCounterNumber.toFloat() / project.totalRows.toFloat()).coerceIn(0f, 1f)
+    } else {
+        null
+    }
+    
+    val interactionSource = remember { MutableInteractionSource() }
+    
+    Card(
+        modifier = modifier
+            .fillMaxWidth()
+            .clickable(
+                interactionSource = interactionSource,
+                indication = null
+            ) { 
+                if (isMultiSelectMode) {
+                    onSelect()
+                } else {
+                    // If swiped, reset swipe; otherwise open
+                    if (swipeOffset < 0f) {
+                        onResetSwipe()
+                    } else {
+                        onOpen()
+                    }
+                }
+            }
+            .pointerInput(project.id, isMultiSelectMode) {
+                if (!isMultiSelectMode) {
+                    detectTapGestures(
+                        onLongPress = {
+                            onToggleMultiSelect()
+                            onSelect()
                         }
                     )
-                    Divider()
+                }
+            },
+        shape = RoundedCornerShape(16.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = if (isSelected && isMultiSelectMode) {
+                MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f)
+            } else {
+                MaterialTheme.colorScheme.surface
+            }
+        )
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            // Header row with checkbox/icon, title, and delete button
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.weight(1f)
+                ) {
+                    // Checkbox in multi-select mode, icon otherwise
+                    if (isMultiSelectMode) {
+                        Checkbox(
+                            checked = isSelected,
+                            onCheckedChange = { onSelect() }
+                        )
+                    } else {
+                        // Icon container with background
+                        Box(
+                            modifier = Modifier
+                                .size(40.dp)
+                                .clip(RoundedCornerShape(10.dp))
+                                .background(
+                                    MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f)
+                                ),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                imageVector = projectIcon,
+                                contentDescription = project.type.name,
+                                modifier = Modifier.size(24.dp),
+                                tint = MaterialTheme.colorScheme.primary
+                            )
+                        }
+                    }
+                    
+                    Column(
+                        modifier = Modifier.weight(1f),
+                        verticalArrangement = Arrangement.spacedBy(4.dp)
+                    ) {
+                        Text(
+                            text = project.title.ifBlank { "Untitled Project" },
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.SemiBold,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                        Text(
+                            text = when (project.type) {
+                                ProjectType.SINGLE -> "Single Counter"
+                                ProjectType.DOUBLE -> "Double Counter"
+                            },
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+                        )
+                    }
+                }
+                
+                // Delete button (only show when not in multi-select mode)
+                if (!isMultiSelectMode) {
+                    IconButton(
+                        onClick = onDelete,
+                        modifier = Modifier.size(40.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Delete,
+                            contentDescription = "Delete project",
+                            tint = MaterialTheme.colorScheme.error.copy(alpha = 0.7f),
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
+                }
+            }
+            
+            // Stats row - different layout based on project type
+            when (project.type) {
+                ProjectType.SINGLE -> {
+                    // Single counter: just show count
+                    StatBadge(
+                        label = "Count",
+                        value = project.stitchCounterNumber.toString(),
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
+                ProjectType.DOUBLE -> {
+                    // Double counter: show stitches and rows
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(16.dp)
+                    ) {
+                        StatBadge(
+                            label = "Stitches",
+                            value = project.stitchCounterNumber.toString(),
+                            modifier = Modifier.weight(1f)
+                        )
+                        StatBadge(
+                            label = "Rows",
+                            value = "${project.rowCounterNumber}${if (project.totalRows > 0) "/${project.totalRows}" else ""}",
+                            modifier = Modifier.weight(1f)
+                        )
+                    }
+                    
+                    // Progress indicator (only for double counters)
+                    if (rowProgress != null) {
+                        RowProgressIndicator(
+                            progress = rowProgress,
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                    }
                 }
             }
         }
@@ -66,31 +436,157 @@ fun LibraryScreen(
 }
 
 @Composable
-private fun ProjectRow(project: Project, onOpen: () -> Unit, onDelete: () -> Unit) {
-    Column(modifier = Modifier
-        .fillMaxWidth()
-        .clickable { onOpen() }
-        .padding(12.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp)
+private fun StatBadge(
+    label: String,
+    value: String,
+    modifier: Modifier = Modifier
+) {
+    Column(
+        modifier = modifier
+            .clip(RoundedCornerShape(8.dp))
+            .background(
+                MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+            )
+            .padding(horizontal = 12.dp, vertical = 8.dp),
+        verticalArrangement = Arrangement.spacedBy(2.dp)
     ) {
-        Row(modifier = Modifier
-            .fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Column {
-                Text(project.title.ifBlank { "Untitled" })
-                Text("Type: ${project.type}")
-            }
-            Button(onClick = onDelete) { Text("Delete") }
-        }
-
-        val rowProgress: Float? = if (project.totalRows > 0) {
-            (project.rowCounterNumber.toFloat() / project.totalRows.toFloat()).coerceIn(0f, 1f)
-        } else {
-            null
-        }
-        RowProgressIndicator(progress = rowProgress, modifier = Modifier.fillMaxWidth())
+        Text(
+            text = value,
+            style = MaterialTheme.typography.titleSmall,
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.primary
+        )
+        Text(
+            text = label,
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+        )
     }
+}
 
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun LibraryTopBar(
+    onEnterMultiSelect: () -> Unit
+) {
+    TopAppBar(
+        title = {
+            Text("Library")
+        },
+        actions = {
+            IconButton(onClick = onEnterMultiSelect) {
+                Icon(
+                    imageVector = Icons.Default.SelectAll,
+                    contentDescription = "Select multiple"
+                )
+            }
+        }
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun MultiSelectTopBar(
+    selectedCount: Int,
+    totalCount: Int,
+    onSelectAll: () -> Unit,
+    onClearSelection: () -> Unit,
+    onDelete: () -> Unit,
+    onCancel: () -> Unit
+) {
+    TopAppBar(
+        title = {
+            Text(
+                text = if (selectedCount > 0) {
+                    "$selectedCount selected"
+                } else {
+                    "Select projects"
+                }
+            )
+        },
+        navigationIcon = {
+            IconButton(onClick = onCancel) {
+                Icon(
+                    imageVector = Icons.Default.Close,
+                    contentDescription = "Cancel selection"
+                )
+            }
+        },
+        actions = {
+            if (selectedCount == totalCount && totalCount > 0) {
+                IconButton(onClick = onClearSelection) {
+                    Icon(
+                        imageVector = Icons.Default.Check,
+                        contentDescription = "Clear selection"
+                    )
+                }
+            } else {
+                IconButton(onClick = onSelectAll) {
+                    Icon(
+                        imageVector = Icons.Default.SelectAll,
+                        contentDescription = "Select all"
+                    )
+                }
+            }
+            IconButton(
+                onClick = onDelete,
+                enabled = selectedCount > 0
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Delete,
+                    contentDescription = "Delete selected",
+                    tint = if (selectedCount > 0) {
+                        MaterialTheme.colorScheme.error
+                    } else {
+                        MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
+                    }
+                )
+            }
+        }
+    )
+}
+
+@Composable
+private fun DeleteConfirmationDialog(
+    projectCount: Int,
+    onConfirm: () -> Unit,
+    onDismiss: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = {
+            Text(
+                text = if (projectCount == 1) {
+                    "Delete Project?"
+                } else {
+                    "Delete Projects?"
+                }
+            )
+        },
+        text = {
+            Text(
+                text = if (projectCount == 1) {
+                    "Are you sure you want to delete this project? This action cannot be undone."
+                } else {
+                    "Are you sure you want to delete $projectCount projects? This action cannot be undone."
+                }
+            )
+        },
+        confirmButton = {
+            TextButton(
+                onClick = onConfirm,
+                colors = ButtonDefaults.textButtonColors(
+                    contentColor = MaterialTheme.colorScheme.error
+                )
+            ) {
+                Text("Delete")
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Cancel")
+            }
+        }
+    )
 }
 

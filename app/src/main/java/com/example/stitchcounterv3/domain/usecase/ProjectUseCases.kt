@@ -37,3 +37,14 @@ class DeleteProject @Inject constructor(
     suspend operator fun invoke(project: Project) = repo.delete(project.toEntity())
 }
 
+@Singleton
+class DeleteProjects @Inject constructor(
+    private val repo: ProjectRepository
+) {
+    suspend operator fun invoke(projects: List<Project>) {
+        if (projects.isNotEmpty()) {
+            repo.deleteByIds(projects.map { it.id })
+        }
+    }
+}
+
