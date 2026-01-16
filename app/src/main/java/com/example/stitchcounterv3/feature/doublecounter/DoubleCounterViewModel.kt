@@ -24,7 +24,17 @@ data class DoubleCounterUiState(
     val rowCounterState: CounterState = CounterState(),
     val totalRows: Int = 0,
     val isLoading: Boolean = false,
-)
+) {
+    /**
+     * Calculated progress for row completion (0f to 1f).
+     * Returns null if totalRows is not set (0), indicating progress should not be shown.
+     */
+    val rowProgress: Float? = if (totalRows > 0) {
+        (rowCounterState.count.toFloat() / totalRows.toFloat()).coerceIn(0f, 1f)
+    } else {
+        null
+    }
+}
 
 enum class CounterType {
     STITCH,

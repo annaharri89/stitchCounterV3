@@ -18,6 +18,7 @@ import com.example.stitchcounterv3.domain.model.CounterState
 import com.example.stitchcounterv3.feature.doublecounter.CounterType
 import com.example.stitchcounterv3.feature.sharedComposables.BottomActionButtons
 import com.example.stitchcounterv3.feature.sharedComposables.CounterView
+import com.example.stitchcounterv3.feature.sharedComposables.RowProgressIndicator
 import com.example.stitchcounterv3.ui.theme.StitchCounterV3Theme
 
 @Composable
@@ -48,6 +49,10 @@ fun DoubleCounterLandscapeLayout(
                 modifier = Modifier.weight(1f)
             )
         }
+
+        RowProgressIndicator(
+            progress = state.rowProgress
+        )
 
         Row(
             modifier = Modifier.weight(1f),

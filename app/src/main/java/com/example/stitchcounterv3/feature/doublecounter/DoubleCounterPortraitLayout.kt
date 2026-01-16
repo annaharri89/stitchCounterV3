@@ -19,6 +19,7 @@ import com.example.stitchcounterv3.domain.model.CounterState
 import com.example.stitchcounterv3.feature.doublecounter.CounterType
 import com.example.stitchcounterv3.feature.sharedComposables.BottomActionButtons
 import com.example.stitchcounterv3.feature.sharedComposables.CounterView
+import com.example.stitchcounterv3.feature.sharedComposables.RowProgressIndicator
 import com.example.stitchcounterv3.ui.theme.StitchCounterV3Theme
 
 interface DoubleCounterActions {
@@ -54,6 +55,10 @@ fun DoubleCounterPortraitLayout(
             value = state.totalRows.toString(),
             onValueChange = { v -> v.toIntOrNull()?.let(actions::setTotalRows) },
             label = { Text("Total Rows") }
+        )
+
+        RowProgressIndicator(
+            progress = state.rowProgress
         )
 
         // Stitches Counter Section
