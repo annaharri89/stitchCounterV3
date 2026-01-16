@@ -25,6 +25,7 @@ import com.example.stitchcounterv3.domain.model.ProjectType
 import com.example.stitchcounterv3.feature.navigation.RootNavGraph
 import com.example.stitchcounterv3.feature.navigation.RootNavigationViewModel
 import com.example.stitchcounterv3.feature.navigation.SheetScreen
+import com.example.stitchcounterv3.feature.sharedComposables.RowProgressIndicator
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 
@@ -33,7 +34,6 @@ import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 @Destination
 @Composable
 fun LibraryScreen(
-    navigator: DestinationsNavigator,
     viewModel: LibraryViewModel = hiltViewModel(),
     rootNavigationViewModel: RootNavigationViewModel
 ) {
@@ -67,18 +67,30 @@ fun LibraryScreen(
 
 @Composable
 private fun ProjectRow(project: Project, onOpen: () -> Unit, onDelete: () -> Unit) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable { onOpen() }
-            .padding(12.dp),
-        horizontalArrangement = Arrangement.SpaceBetween
+    Column(modifier = Modifier
+        .fillMaxWidth()
+        .clickable { onOpen() }
+        .padding(12.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        Column {
-            Text(project.title.ifBlank { "Untitled" })
-            Text("Type: ${project.type}")
+        Row(modifier = Modifier
+            .fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Column {
+                Text(project.title.ifBlank { "Untitled" })
+                Text("Type: ${project.type}")
+            }
+            Button(onClick = onDelete) { Text("Delete") }
         }
-        Button(onClick = onDelete) { Text("Delete") }
+
+        val rowProgress: Float? = if (project.totalRows > 0) {
+            (project.rowCounterNumber.toFloat() / project.totalRows.toFloat()).coerceIn(0f, 1f)
+        } else {
+            null
+        }
+        RowProgressIndicator(progress = rowProgress, modifier = Modifier.fillMaxWidth())
     }
+
 }
 
