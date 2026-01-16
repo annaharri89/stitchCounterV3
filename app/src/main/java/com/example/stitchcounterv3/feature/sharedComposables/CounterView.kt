@@ -37,6 +37,7 @@ fun CounterView(
     incrementFontSize: Int = 50,
     decrementFontSize: Int = 60,
     showResetButton: Boolean = true,
+    counterNumberIsVertical: Boolean = false
     ) {
         Column(
             modifier = modifier,
@@ -49,21 +50,35 @@ fun CounterView(
                 )
             }
 
-            Row(
-                modifier = Modifier.weight(1f),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.Center
-            ) {
+            if (counterNumberIsVertical) {
                 ResizableText(
                     modifier = Modifier
-                        .weight(1f)
-                        .padding(end = textPaddingEnd.dp),
+                        .weight(1f),
                     text = "$count",
                     heightRatio = 0.6f,
                     widthRatio = 0.3f,
                     minFontSize = 48f,
                     maxFontSize = 200f
                 )
+            }
+
+            Row(
+                modifier = Modifier.weight(1f),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center
+            ) {
+                if (!counterNumberIsVertical) {
+                    ResizableText(
+                        modifier = Modifier
+                            .weight(1f)
+                            .padding(end = textPaddingEnd.dp),
+                        text = "$count",
+                        heightRatio = 0.6f,
+                        widthRatio = 0.3f,
+                        minFontSize = 48f,
+                        maxFontSize = 200f
+                    )
+                }
 
                 IncreaseDecreaseButtons(
                     modifier = Modifier.weight(2f),
@@ -78,7 +93,7 @@ fun CounterView(
 
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = if (!showResetButton) Arrangement.Center else Arrangement.Start
+                horizontalArrangement = if (!showResetButton) Arrangement.SpaceAround else Arrangement.Start
             ) {
                 if (showResetButton) {
                     Button(
@@ -87,7 +102,7 @@ fun CounterView(
                             contentColor = Color.White
                         ),
                         onClick = { onReset() },
-                        modifier = Modifier.weight(.5f)
+                        modifier = Modifier.weight(.5f).padding(end = 4.dp)
                     ) {
                         Text("Reset")
                     }
