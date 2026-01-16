@@ -1,4 +1,4 @@
-package com.example.stitchcounterv3.feature.single
+package com.example.stitchcounterv3.feature.singleCounter
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -20,9 +20,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.example.stitchcounterv3.feature.sharedComposables.AdjustmentButtons
-import com.example.stitchcounterv3.feature.sharedComposables.CounterButtons
-import com.example.stitchcounterv3.feature.sharedComposables.ResizableText
+import com.example.stitchcounterv3.feature.sharedComposables.CounterView
+import com.example.stitchcounterv3.feature.sharedComposables.IncreaseDecreaseButtons
 import com.example.stitchcounterv3.ui.theme.StitchCounterV3Theme
 
 @Composable
@@ -42,35 +41,31 @@ fun SingleCounterPortraitLayout(
             label = { Text("Project Name") }
         )
 
-        ResizableText(
-            text = state.count.toString(),
+        CounterView(
             modifier = Modifier.weight(1f),
-            heightRatio =  0.8f,
-            widthRatio = 0.4f,
-            minFontSize = 48f,
-            maxFontSize = 300f
-        )
-
-        CounterButtons(
+            count = state.count,
+            selectedAdjustmentAmount = state.adjustment,
             onIncrement = { viewModel.increment() },
             onDecrement = { viewModel.decrement() },
-            buttonSpacing = 24,
-            buttonShape = RoundedCornerShape(12.dp),
-            incrementFontSize = 60,
-            decrementFontSize = 80
-        )
-
-        AdjustmentButtons(
-            selectedAdjustmentAmount = state.adjustment,
             onAdjustmentClick = { viewModel.changeAdjustment(it) },
+            onReset = {
+                //todo
+            }
         )
         
         Spacer(modifier = Modifier.weight(.5f))
 
         // Action buttons
-        Row(
+        Row(//todo  shared composable
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
+            Button(
+                onClick = { viewModel.save() },
+                modifier = Modifier.weight(1f)
+            ) {
+                Text("Save")
+            }
+
             Button(
                 colors = ButtonDefaults.buttonColors(
                     containerColor = MaterialTheme.colorScheme.error,
@@ -80,13 +75,6 @@ fun SingleCounterPortraitLayout(
                 modifier = Modifier.weight(1f)
             ) {
                 Text("Reset")
-            }
-
-            Button(
-                onClick = { viewModel.save() },
-                modifier = Modifier.weight(1f)
-            ) {
-                Text("Save")
             }
         }
     }
@@ -109,7 +97,7 @@ private fun SingleCounterPortraitPreview() {
                     label = { Text("Project Name") }
                 )
                 Text("Count: 0", style = MaterialTheme.typography.headlineMedium)
-                CounterButtons(
+                IncreaseDecreaseButtons(
                     onIncrement = { },
                     onDecrement = { },
                     buttonSpacing = 24,

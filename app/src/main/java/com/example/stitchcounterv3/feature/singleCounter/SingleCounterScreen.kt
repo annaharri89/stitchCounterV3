@@ -1,7 +1,5 @@
-package com.example.stitchcounterv3.feature.single
+package com.example.stitchcounterv3.feature.singleCounter
 
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
@@ -15,7 +13,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.stitchcounterv3.feature.navigation.RootNavGraph
 import com.example.stitchcounterv3.feature.sharedComposables.AdaptiveLayout
 import com.ramcosta.composedestinations.annotation.Destination
-import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 
 /**
  * Single Counter Screen - Material 3 Bottom Sheet Implementation

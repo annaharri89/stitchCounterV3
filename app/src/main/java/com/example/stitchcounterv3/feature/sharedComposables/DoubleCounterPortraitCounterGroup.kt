@@ -1,10 +1,8 @@
 package com.example.stitchcounterv3.feature.sharedComposables
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -20,7 +18,7 @@ import androidx.compose.ui.unit.dp
 import com.example.stitchcounterv3.domain.model.AdjustmentAmount
 
 @Composable
-fun CounterSection(
+fun DoubleCounterSectionPortrait(
     label: String,
     count: Int,
     selectedAdjustmentAmount: AdjustmentAmount,
@@ -62,7 +60,7 @@ fun CounterSection(
                 maxFontSize = 200f
             )
 
-            CounterButtons(
+            IncreaseDecreaseButtons(
                 modifier = Modifier.weight(buttonsWeight),
                 onIncrement = onIncrement,
                 onDecrement = onDecrement,

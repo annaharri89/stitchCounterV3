@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.RowScope
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalConfiguration
 
+/** Handles orientation changes in the user's phone.**/
 @Composable
 fun AdaptiveLayout(
     portraitContent: @Composable ColumnScope.() -> Unit,

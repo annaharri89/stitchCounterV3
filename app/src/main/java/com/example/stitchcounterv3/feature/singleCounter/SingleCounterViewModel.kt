@@ -1,4 +1,4 @@
-package com.example.stitchcounterv3.feature.single
+package com.example.stitchcounterv3.feature.singleCounter
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope

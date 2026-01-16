@@ -7,7 +7,6 @@ import com.example.stitchcounterv3.domain.model.Project
 import com.example.stitchcounterv3.domain.model.ProjectType
 import com.example.stitchcounterv3.domain.usecase.GetProject
 import com.example.stitchcounterv3.domain.usecase.UpsertProject
-import com.example.stitchcounterv3.feature.single.SingleCounterUiState
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject

@@ -1,4 +1,4 @@
-package com.example.stitchcounterv3.feature.single
+package com.example.stitchcounterv3.feature.singleCounter
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -19,7 +19,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.stitchcounterv3.feature.sharedComposables.AdjustmentButtons
-import com.example.stitchcounterv3.feature.sharedComposables.CounterButtons
+import com.example.stitchcounterv3.feature.sharedComposables.IncreaseDecreaseButtons
 import com.example.stitchcounterv3.feature.sharedComposables.ResizableText
 import com.example.stitchcounterv3.ui.theme.StitchCounterV3Theme
 
@@ -87,7 +87,7 @@ fun SingleCounterLandscapeLayout(
             verticalArrangement = Arrangement.spacedBy(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            CounterButtons(
+            IncreaseDecreaseButtons(
                 onIncrement = { viewModel.increment() },
                 onDecrement = { viewModel.decrement() },
                 buttonSpacing = 24,

@@ -4,11 +4,9 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
@@ -22,9 +20,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.stitchcounterv3.domain.model.AdjustmentAmount
-import com.example.stitchcounterv3.feature.sharedComposables.CounterButtons
-import com.example.stitchcounterv3.feature.sharedComposables.CounterSection
-import com.example.stitchcounterv3.feature.sharedComposables.ResizableText
+import com.example.stitchcounterv3.feature.sharedComposables.DoubleCounterSectionPortrait
 import com.example.stitchcounterv3.ui.theme.StitchCounterV3Theme
 
 @Composable
@@ -52,7 +48,7 @@ fun DoubleCounterPortraitLayout(
         )
 
         // Stitches Counter Section
-        CounterSection(
+        DoubleCounterSectionPortrait(
             modifier = Modifier.weight(1f),
             label = "Stitches",
             count = state.stitchCount,
@@ -64,7 +60,7 @@ fun DoubleCounterPortraitLayout(
         )
 
         // Rows Counter Section
-        CounterSection(
+        DoubleCounterSectionPortrait(
             modifier = Modifier.weight(1f),
             label = "Rows/Rounds",
             count = state.rowCount,
@@ -124,7 +120,7 @@ private fun DoubleCounterPortraitPreview() {
                     label = { Text("Total Rows") }
                 )
                 
-                CounterSection(
+                DoubleCounterSectionPortrait(
                     label = "Stitches",
                     count = 42,
                     selectedAdjustmentAmount = AdjustmentAmount.FIVE,
@@ -135,7 +131,7 @@ private fun DoubleCounterPortraitPreview() {
 
                 )
                 
-                CounterSection(
+                DoubleCounterSectionPortrait(
                     label = "Rows/Rounds",
                     count = 15,
                     selectedAdjustmentAmount = AdjustmentAmount.FIVE,

@@ -9,6 +9,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.stitchcounterv3.domain.model.AdjustmentAmount
 
@@ -53,7 +54,7 @@ fun CounterSectionLandscape(
             maxFontSize = 200f
         )
 
-        CounterButtons(
+        IncreaseDecreaseButtons(
             onIncrement = onIncrement,
             onDecrement = onDecrement,
             buttonSpacing = buttonSpacing,
@@ -66,4 +67,10 @@ fun CounterSectionLandscape(
             Spacer(modifier = Modifier.weight(0.5f))
         }
     }
+}
+
+@Preview
+@Composable
+fun CounterSectionLandscapePreview() {
+    CounterSectionLandscape(count = 5, onDecrement = {}, onIncrement = {}, label = "Stitches", onAdjustmentClick = {}, selectedAdjustmentAmount = AdjustmentAmount.FIVE)
 }

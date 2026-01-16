@@ -16,7 +16,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.compose.rememberNavController
 import com.example.stitchcounterv3.feature.NavGraphs
 import com.example.stitchcounterv3.feature.doublecounter.DoubleCounterScreen
-import com.example.stitchcounterv3.feature.single.SingleCounterScreen
+import com.example.stitchcounterv3.feature.singleCounter.SingleCounterScreen
 import com.google.accompanist.navigation.material.ExperimentalMaterialNavigationApi
 import com.ramcosta.composedestinations.DestinationsNavHost
 import com.ramcosta.composedestinations.animations.rememberAnimatedNavHostEngine

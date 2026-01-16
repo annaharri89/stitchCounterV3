@@ -4,7 +4,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.aspectRatio
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -16,10 +15,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.stitchcounterv3.domain.model.AdjustmentAmount
 
 @Composable
-fun CounterButtons(
+fun IncreaseDecreaseButtons(
     modifier: Modifier = Modifier,
     onIncrement: () -> Unit,
     onDecrement: () -> Unit,
@@ -27,6 +25,7 @@ fun CounterButtons(
     buttonShape: RoundedCornerShape = RoundedCornerShape(12.dp),
     incrementFontSize: Int = 50,
     decrementFontSize: Int = 60,
+    increaseDecreaseButtonsAspectRatio: Float = 1f
 ) {
     Column(
         modifier = modifier,
@@ -45,8 +44,8 @@ fun CounterButtons(
                     contentColor = Color.White
                 ),
                 modifier = Modifier
-                    .weight(1f)
-                    .aspectRatio(1f),
+                    .weight(1f),
+                    //.aspectRatio(2f),
                 onClick = onDecrement,
                 shape = buttonShape
             ) {
@@ -62,8 +61,8 @@ fun CounterButtons(
             // Increment button
             Button(
                 modifier = Modifier
-                    .weight(1f)
-                    .aspectRatio(1f),
+                    .weight(1f),
+                    //.aspectRatio(2f),
                 onClick = onIncrement,
                 shape = buttonShape
             ) {
