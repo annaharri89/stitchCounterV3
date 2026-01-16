@@ -31,7 +31,7 @@ data class DoubleCounterUiState(
 open class DoubleCounterViewModel @Inject constructor(
     private val getProject: GetProject,
     private val upsertProject: UpsertProject,
-) : ViewModel() {
+) : ViewModel(), DoubleCounterActions {
 
     private val _uiState = MutableStateFlow(DoubleCounterUiState())
     open val uiState: StateFlow<DoubleCounterUiState> = _uiState.asStateFlow()
@@ -60,27 +60,27 @@ open class DoubleCounterViewModel @Inject constructor(
         }
     }
 
-    fun setTitle(title: String) { _uiState.update { currentState -> currentState.copy(title = title) } }
-    fun setTotalRows(rows: Int) { _uiState.update { currentState -> currentState.copy(totalRows = rows.coerceAtLeast(0)) } }
+    override fun setTitle(title: String) { _uiState.update { currentState -> currentState.copy(title = title) } }
+    override fun setTotalRows(rows: Int) { _uiState.update { currentState -> currentState.copy(totalRows = rows.coerceAtLeast(0)) } }
 
-    fun changeStitchAdjustment(value: AdjustmentAmount) { _uiState.update { currentState -> currentState.copy(stitchAdjustment = value) } }//todo lots of repeated code, fix this
-    fun changeRowAdjustment(value: AdjustmentAmount) { _uiState.update { currentState -> currentState.copy(rowAdjustment = value) } }//todo lots of repeated code, fix this
+    override fun changeStitchAdjustment(value: AdjustmentAmount) { _uiState.update { currentState -> currentState.copy(stitchAdjustment = value) } }//todo lots of repeated code, fix this
+    override fun changeRowAdjustment(value: AdjustmentAmount) { _uiState.update { currentState -> currentState.copy(rowAdjustment = value) } }//todo lots of repeated code, fix this
 
-    fun incStitch() { _uiState.update { currentState -> currentState.copy(stitchCount = currentState.stitchCount + currentState.stitchAdjustment.adjustmentAmount) } }//todo lots of repeated code, fix this
-    fun decStitch() { _uiState.update { currentState -> currentState.copy(stitchCount = (currentState.stitchCount - currentState.stitchAdjustment.adjustmentAmount).coerceAtLeast(0)) } }//todo lots of repeated code, fix this
-    fun resetStitch() { _uiState.update { currentState -> currentState.copy(stitchCount = 0) } }//todo lots of repeated code, fix this
+    override fun incStitch() { _uiState.update { currentState -> currentState.copy(stitchCount = currentState.stitchCount + currentState.stitchAdjustment.adjustmentAmount) } }//todo lots of repeated code, fix this
+    override fun decStitch() { _uiState.update { currentState -> currentState.copy(stitchCount = (currentState.stitchCount - currentState.stitchAdjustment.adjustmentAmount).coerceAtLeast(0)) } }//todo lots of repeated code, fix this
+    override fun resetStitch() { _uiState.update { currentState -> currentState.copy(stitchCount = 0) } }//todo lots of repeated code, fix this
 
-    fun incRow() {//todo lots of repeated code, fix this
+    override fun incRow() {//todo lots of repeated code, fix this
         val newRow = _uiState.value.rowCount + _uiState.value.rowAdjustment.adjustmentAmount
         _uiState.update { currentState -> currentState.copy(rowCount = newRow) }
     }
-    fun decRow() {//todo lots of repeated code, fix this
+    override fun decRow() {//todo lots of repeated code, fix this
         val newRow = (_uiState.value.rowCount - _uiState.value.rowAdjustment.adjustmentAmount).coerceAtLeast(0)
         _uiState.update { currentState -> currentState.copy(rowCount = newRow) }
     }
-    fun resetRow() { _uiState.update { currentState -> currentState.copy(rowCount = 0) } }//todo lots of repeated code, fix this
+    override fun resetRow() { _uiState.update { currentState -> currentState.copy(rowCount = 0) } }//todo lots of repeated code, fix this
 
-    fun save() {
+    override fun save() {
         viewModelScope.launch {
             val s = _uiState.value
             val project = Project(
@@ -108,6 +108,11 @@ open class DoubleCounterViewModel @Inject constructor(
 
     fun resetState() {
         _uiState.update { _ -> DoubleCounterUiState() }
+    }
+
+    override fun resetAll() {
+        resetStitch()
+        resetRow()
     }
 }
 

@@ -27,7 +27,7 @@ data class SingleCounterUiState(
 open class SingleCounterViewModel @Inject constructor(
     private val getProject: GetProject,
     private val upsertProject: UpsertProject,
-) : ViewModel() {
+) : ViewModel(), SingleCounterActions {
     private val _uiState = MutableStateFlow(SingleCounterUiState())
     open val uiState: StateFlow<SingleCounterUiState> = _uiState.asStateFlow()
 
@@ -52,23 +52,23 @@ open class SingleCounterViewModel @Inject constructor(
         }
     }
 
-    fun setTitle(title: String) {
+    override fun setTitle(title: String) {
         _uiState.update { currentState -> currentState.copy(title = title) }
     }
 
-    fun changeAdjustment(value: AdjustmentAmount) {
+    override fun changeAdjustment(value: AdjustmentAmount) {
         _uiState.update { currentState -> currentState.copy(adjustment = value) }
     }
 
-    fun increment() {
+    override fun increment() {
         _uiState.update { currentState -> currentState.copy(count = currentState.count + currentState.adjustment.adjustmentAmount) }
     }
 
-    fun decrement() {
+    override fun decrement() {
         _uiState.update { currentState -> currentState.copy(count = (currentState.count - currentState.adjustment.adjustmentAmount).coerceAtLeast(0)) }
     }
 
-    fun resetCount() {
+    override fun resetCount() {
         _uiState.update { currentState -> currentState.copy(count = 0) }
     }
 
@@ -76,7 +76,7 @@ open class SingleCounterViewModel @Inject constructor(
         _uiState.update { _ -> SingleCounterUiState() }
     }
 
-    fun save() {
+    override fun save() {
         viewModelScope.launch {
             val state = _uiState.value
             val project = Project(

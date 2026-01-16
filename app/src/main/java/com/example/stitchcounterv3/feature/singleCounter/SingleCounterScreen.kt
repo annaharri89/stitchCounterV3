@@ -50,10 +50,10 @@ fun SingleCounterScreen(
     ) {
         AdaptiveLayout(
             portraitContent = {
-                SingleCounterPortraitLayout(state, viewModel)
+                SingleCounterPortraitLayout(state, actions = viewModel)
             },
             landscapeContent = {
-                SingleCounterLandscapeLayout(state, viewModel)
+                SingleCounterLandscapeLayout(state, actions = viewModel)
             }
         )
     }

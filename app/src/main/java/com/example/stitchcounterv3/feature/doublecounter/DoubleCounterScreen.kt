@@ -50,25 +50,15 @@ fun DoubleCounterScreen(
         AdaptiveLayout(
             portraitContent = {
                 DoubleCounterPortraitLayout(
-                    state,
-                    viewModel,
-                    onSave = {
-                        viewModel.save()
-                    },
-                    onResetAll = {
-                        viewModel.resetStitch(); viewModel.resetRow()
-                    })
+                    state = state,
+                    actions = viewModel
+                )
             },
             landscapeContent = {
                 DoubleCounterLandscapeLayout(
-                    state,
-                    viewModel,
-                    onSave = {
-                        viewModel.save()
-                    },
-                    onResetAll = {
-                        viewModel.resetStitch(); viewModel.resetRow()
-                    })
+                    state = state,
+                    actions = viewModel
+                )
             }
         )
     }

@@ -2,13 +2,10 @@ package com.example.stitchcounterv3.feature.doublecounter
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Button
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -17,18 +14,30 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.stitchcounterv3.domain.model.AdjustmentAmount
 import com.example.stitchcounterv3.feature.sharedComposables.BottomActionButtons
 import com.example.stitchcounterv3.feature.sharedComposables.CounterView
 import com.example.stitchcounterv3.ui.theme.StitchCounterV3Theme
 
+interface DoubleCounterActions {
+    fun setTitle(title: String)
+    fun setTotalRows(rows: Int)
+    fun incStitch()
+    fun decStitch()
+    fun resetStitch()
+    fun changeStitchAdjustment(value: AdjustmentAmount)
+    fun incRow()
+    fun decRow()
+    fun resetRow()
+    fun changeRowAdjustment(value: AdjustmentAmount)
+    fun resetAll()
+    fun save()
+}
+
 @Composable
 fun DoubleCounterPortraitLayout(
     state: DoubleCounterUiState,
-    viewModel: DoubleCounterViewModel,
-    onResetAll: () -> Unit,
-    onSave: () -> Unit
+    actions: DoubleCounterActions
 ) {
     Column(
         modifier = Modifier.padding(24.dp),
@@ -38,14 +47,14 @@ fun DoubleCounterPortraitLayout(
         OutlinedTextField(
             modifier = Modifier.fillMaxWidth(),
             value = state.title,
-            onValueChange = { viewModel.setTitle(it) },
+            onValueChange = actions::setTitle,
             label = { Text("Project Name") }
         )
         
         OutlinedTextField(
             modifier = Modifier.fillMaxWidth(),
             value = state.totalRows.toString(),
-            onValueChange = { v -> v.toIntOrNull()?.let(viewModel::setTotalRows) },
+            onValueChange = { v -> v.toIntOrNull()?.let(actions::setTotalRows) },
             label = { Text("Total Rows") }
         )
 
@@ -55,10 +64,10 @@ fun DoubleCounterPortraitLayout(
             label = "Stitches",
             count = state.stitchCount,
             selectedAdjustmentAmount = state.stitchAdjustment,
-            onIncrement = { viewModel.incStitch() },
-            onDecrement = { viewModel.decStitch() },
-            onReset = { viewModel.resetStitch() },
-            onAdjustmentClick = { viewModel.changeStitchAdjustment(it) }
+            onIncrement = actions::incStitch,
+            onDecrement = actions::decStitch,
+            onReset = actions::resetStitch,
+            onAdjustmentClick = actions::changeStitchAdjustment
         )
 
         // Rows Counter Section
@@ -67,17 +76,17 @@ fun DoubleCounterPortraitLayout(
             label = "Rows/Rounds",
             count = state.rowCount,
             selectedAdjustmentAmount = state.rowAdjustment,
-            onIncrement = { viewModel.incRow() },
-            onDecrement = { viewModel.decRow() },
-            onReset = { viewModel.resetRow() },
-            onAdjustmentClick = { viewModel.changeRowAdjustment(it) }
+            onIncrement = actions::incRow,
+            onDecrement = actions::decRow,
+            onReset = actions::resetRow,
+            onAdjustmentClick = actions::changeRowAdjustment
         )
         
         Spacer(modifier = Modifier.weight(.25f))
 
         BottomActionButtons(
-            onResetAll = onResetAll,
-            onSave = onSave
+            onResetAll = actions::resetAll,
+            onSave = actions::save
         )
     }
 }
@@ -87,8 +96,31 @@ fun DoubleCounterPortraitLayout(
 private fun DoubleCounterPortraitPreview() {
     StitchCounterV3Theme {
         Surface(modifier = Modifier.fillMaxSize()) {
+            val fakeActions = object : DoubleCounterActions {
+                override fun setTitle(title: String) {}
+                override fun setTotalRows(rows: Int) {}
+                override fun incStitch() {}
+                override fun decStitch() {}
+                override fun resetStitch() {}
+                override fun changeStitchAdjustment(value: AdjustmentAmount) {}
+                override fun incRow() {}
+                override fun decRow() {}
+                override fun resetRow() {}
+                override fun changeRowAdjustment(value: AdjustmentAmount) {}
+                override fun resetAll() {}
+                override fun save() {}
+            }
+            
             DoubleCounterPortraitLayout(
-                DoubleCounterUiState(), viewModel(), {}, { }
+                state = DoubleCounterUiState(
+                    title = "Sample Project",
+                    stitchCount = 42,
+                    stitchAdjustment = AdjustmentAmount.FIVE,
+                    rowCount = 10,
+                    rowAdjustment = AdjustmentAmount.ONE,
+                    totalRows = 20
+                ),
+                actions = fakeActions
             )
         }
     }

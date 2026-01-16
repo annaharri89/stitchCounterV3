@@ -7,9 +7,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -18,7 +15,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.example.stitchcounterv3.domain.model.AdjustmentAmount
 import com.example.stitchcounterv3.feature.sharedComposables.AdjustmentButtons
+import com.example.stitchcounterv3.feature.sharedComposables.BottomActionButtons
 import com.example.stitchcounterv3.feature.sharedComposables.IncreaseDecreaseButtons
 import com.example.stitchcounterv3.feature.sharedComposables.ResizableText
 import com.example.stitchcounterv3.ui.theme.StitchCounterV3Theme
@@ -26,7 +25,7 @@ import com.example.stitchcounterv3.ui.theme.StitchCounterV3Theme
 @Composable
 fun SingleCounterLandscapeLayout(
     state: SingleCounterUiState,
-    viewModel: SingleCounterViewModel
+    actions: SingleCounterActions
 ) {
     Row(
         modifier = Modifier
@@ -43,7 +42,7 @@ fun SingleCounterLandscapeLayout(
         ) {
             OutlinedTextField(
                 value = state.title,
-                onValueChange = { viewModel.setTitle(it) },
+                onValueChange = actions::setTitle,
                 label = { Text("Project Name") },
                 modifier = Modifier.fillMaxWidth()
             )
@@ -57,28 +56,10 @@ fun SingleCounterLandscapeLayout(
                 maxFontSize = 300f
             )
 
-            // Action buttons
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                Button(
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.error,
-                        contentColor = androidx.compose.ui.graphics.Color.White
-                    ),
-                    onClick = { viewModel.resetCount() },
-                    modifier = Modifier.weight(1f)
-                ) {
-                    Text("Reset")
-                }
-
-                Button(
-                    onClick = { viewModel.save() },
-                    modifier = Modifier.weight(1f)
-                ) {
-                    Text("Save")
-                }
-            }
+            BottomActionButtons(
+                onResetAll = actions::resetCount,
+                onSave = actions::save
+            )
         }
         
         // Right side - Main counter buttons
@@ -88,8 +69,8 @@ fun SingleCounterLandscapeLayout(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             IncreaseDecreaseButtons(
-                onIncrement = { viewModel.increment() },
-                onDecrement = { viewModel.decrement() },
+                onIncrement = actions::increment,
+                onDecrement = actions::decrement,
                 buttonSpacing = 24,
                 buttonShape = RoundedCornerShape(12.dp),
                 incrementFontSize = 60,
@@ -98,7 +79,7 @@ fun SingleCounterLandscapeLayout(
 
             AdjustmentButtons(
                 selectedAdjustmentAmount = state.adjustment,
-                onAdjustmentClick = { viewModel.changeAdjustment(it) },
+                onAdjustmentClick = actions::changeAdjustment,
             )
         }
     }
@@ -109,50 +90,23 @@ fun SingleCounterLandscapeLayout(
 private fun SingleCounterLandscapeScreenPreview() {
     StitchCounterV3Theme {
         Surface(modifier = Modifier.fillMaxSize()) {
-            // Preview the layout directly without ViewModel dependency
-            Row(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(24.dp),
-                horizontalArrangement = Arrangement.spacedBy(32.dp)
-            ) {
-                // Left side - Project info and controls
-                Column(
-                    modifier = Modifier.weight(1f),
-                    verticalArrangement = Arrangement.spacedBy(16.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    OutlinedTextField(
-                        value = "Sample Project",
-                        onValueChange = { },
-                        label = { Text("Project Name") },
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                    
-                    // Action buttons
-                    Row(
-                        horizontalArrangement = Arrangement.spacedBy(12.dp)
-                    ) {
-                        Button(
-                            onClick = { },
-                            modifier = Modifier.weight(1f)
-                        ) { 
-                            Text("Save") 
-                        }
-                        
-                        Button(
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = MaterialTheme.colorScheme.error,
-                                contentColor = androidx.compose.ui.graphics.Color.White
-                            ),
-                            onClick = { },
-                            modifier = Modifier.weight(1f)
-                        ) {
-                            Text("Reset")
-                        }
-                    }
-                }
+            val fakeActions = object : SingleCounterActions {
+                override fun setTitle(title: String) {}
+                override fun increment() {}
+                override fun decrement() {}
+                override fun resetCount() {}
+                override fun changeAdjustment(value: AdjustmentAmount) {}
+                override fun save() {}
             }
+            
+            SingleCounterLandscapeLayout(
+                state = SingleCounterUiState(
+                    title = "Sample Project",
+                    count = 42,
+                    adjustment = AdjustmentAmount.FIVE
+                ),
+                actions = fakeActions
+            )
         }
     }
 }
