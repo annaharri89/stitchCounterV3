@@ -26,9 +26,9 @@ import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material.icons.filled.Numbers
+import androidx.compose.material.icons.filled.LooksOne
+import androidx.compose.material.icons.filled.LooksTwo
 import androidx.compose.material.icons.filled.SelectAll
-import androidx.compose.material.icons.filled.ViewList
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -262,8 +262,8 @@ private fun ProjectRow(
     modifier: Modifier = Modifier
 ) {
     val projectIcon: ImageVector = when (project.type) {
-        ProjectType.SINGLE -> Icons.Default.Numbers
-        ProjectType.DOUBLE -> Icons.Default.ViewList
+        ProjectType.SINGLE -> Icons.Default.LooksOne
+        ProjectType.DOUBLE -> Icons.Default.LooksTwo
     }
     
     val rowProgress: Float? = if (project.totalRows > 0) {
@@ -306,7 +306,7 @@ private fun ProjectRow(
         elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
         colors = CardDefaults.cardColors(
             containerColor = if (isSelected && isMultiSelectMode) {
-                MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f)
+                MaterialTheme.colorScheme.primaryContainer
             } else {
                 MaterialTheme.colorScheme.surface
             }
