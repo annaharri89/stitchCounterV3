@@ -334,7 +334,18 @@ fun RootNavigationScreen(viewModel: RootNavigationViewModel) {
                                 }
                                 viewModel.showBottomSheet(null)
                             },
-                            onCreateProject = null
+                            onCreateProject = null,
+                            onNavigateBack = { projectId ->
+                                when (projectDetailUiState.project?.type) {
+                                    com.example.stitchcounterv3.domain.model.ProjectType.SINGLE -> {
+                                        viewModel.showBottomSheet(SheetScreen.SingleCounter(projectId))
+                                    }
+                                    com.example.stitchcounterv3.domain.model.ProjectType.DOUBLE -> {
+                                        viewModel.showBottomSheet(SheetScreen.DoubleCounter(projectId))
+                                    }
+                                    null -> {}
+                                }
+                            }
                         )
                     }
                 }

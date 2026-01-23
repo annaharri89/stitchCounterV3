@@ -1,10 +1,18 @@
 package com.example.stitchcounterv3.feature.doublecounter
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Info
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.dp
@@ -14,21 +22,13 @@ import com.example.stitchcounterv3.feature.navigation.RootNavGraph
 import com.example.stitchcounterv3.feature.sharedComposables.AdaptiveLayout
 import com.ramcosta.composedestinations.annotation.Destination
 
-/**
- * Double Counter Screen - Material 3 Bottom Sheet Implementation
- * 
- * This screen is displayed as a Material 3 bottom sheet that slides up from the bottom
- * of the screen. It maintains all original functionality while providing a modern bottom sheet UX.
- * Perfect for tracking both stitches and rows/rounds in knitting projects.
- * The bottom sheet is managed by the navigation system in RootNavigationScreen.
- */
-
 @RootNavGraph
 @Destination
 @Composable
 fun DoubleCounterScreen(
     projectId: Int? = null,
-    viewModel: DoubleCounterViewModel = hiltViewModel()
+    viewModel: DoubleCounterViewModel = hiltViewModel(),
+    onNavigateToDetail: ((Int) -> Unit)? = null
 ) {
     LaunchedEffect(projectId) {
         projectId?.let {
@@ -43,24 +43,41 @@ fun DoubleCounterScreen(
     val configuration = LocalConfiguration.current
     val screenHeight = configuration.screenHeightDp.dp
 
-    // The content is wrapped in a Surface with proper height for bottom sheet display
     Surface(
         modifier = Modifier.height(screenHeight * 0.99f)
     ) {
-        AdaptiveLayout(
-            portraitContent = {
-                DoubleCounterPortraitLayout(
-                    state = state,
-                    actions = viewModel
-                )
-            },
-            landscapeContent = {
-                DoubleCounterLandscapeLayout(
-                    state = state,
-                    actions = viewModel
-                )
+        Box {
+            AdaptiveLayout(
+                portraitContent = {
+                    DoubleCounterPortraitLayout(
+                        state = state,
+                        actions = viewModel
+                    )
+                },
+                landscapeContent = {
+                    DoubleCounterLandscapeLayout(
+                        state = state,
+                        actions = viewModel
+                    )
+                }
+            )
+            if (state.id > 0 && onNavigateToDetail != null) {
+                FloatingActionButton(
+                    onClick = {
+                        onNavigateToDetail(state.id)
+                    },
+                    modifier = Modifier
+                        .align(Alignment.TopEnd)
+                        .padding(16.dp),
+                    containerColor = MaterialTheme.colorScheme.primaryContainer
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Info,
+                        contentDescription = "Project details"
+                    )
+                }
             }
-        )
+        }
     }
 }
 

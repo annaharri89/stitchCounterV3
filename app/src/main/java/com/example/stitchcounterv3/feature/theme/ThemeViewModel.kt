@@ -12,10 +12,6 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-/**
- * App-wide theme ViewModel that observes theme changes from DataStore.
- * Used in MainActivity to provide the current theme to StitchCounterV3Theme.
- */
 @HiltViewModel
 class ThemeViewModel @Inject constructor(
     private val themePreferencesRepository: ThemePreferencesRepository
@@ -28,9 +24,6 @@ class ThemeViewModel @Inject constructor(
         observeTheme()
     }
 
-    /**
-     * Observes theme changes from DataStore and updates UI state
-     */
     private fun observeTheme() {
         viewModelScope.launch {
             themePreferencesRepository.selectedTheme.collect { theme ->

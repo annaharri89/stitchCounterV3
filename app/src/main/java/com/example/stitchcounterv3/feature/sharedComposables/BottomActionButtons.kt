@@ -18,7 +18,6 @@ import com.example.stitchcounterv3.ui.theme.quaternary
 fun BottomActionButtons(labelText: String = "Reset",
                         onResetAll: () -> Unit,
                         onSave: () -> Unit) {
-    // Action buttons
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(12.dp)

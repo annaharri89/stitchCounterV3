@@ -4,9 +4,8 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -16,15 +15,12 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.stitchcounterv3.domain.model.AdjustmentAmount
 import com.example.stitchcounterv3.domain.model.CounterState
-import com.example.stitchcounterv3.feature.doublecounter.CounterType
 import com.example.stitchcounterv3.feature.sharedComposables.BottomActionButtons
 import com.example.stitchcounterv3.feature.sharedComposables.CounterView
 import com.example.stitchcounterv3.feature.sharedComposables.RowProgressIndicator
 import com.example.stitchcounterv3.ui.theme.StitchCounterV3Theme
 
 interface DoubleCounterActions {
-    fun setTitle(title: String)
-    fun setTotalRows(rows: Int)
     fun increment(type: CounterType)
     fun decrement(type: CounterType)
     fun reset(type: CounterType)
@@ -39,31 +35,21 @@ fun DoubleCounterPortraitLayout(
     actions: DoubleCounterActions
 ) {
     Column(
-        modifier = Modifier.padding(24.dp),
+        modifier = Modifier.padding(horizontal = 24.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        OutlinedTextField(
-            modifier = Modifier.fillMaxWidth(),
-            value = state.title,
-            onValueChange = actions::setTitle,
-            label = { Text("Project Name") },
-            isError = state.titleError != null,
-            supportingText = state.titleError?.let { { Text(it) } }
-        )
-        
-        OutlinedTextField(
-            modifier = Modifier.fillMaxWidth(),
-            value = state.totalRows.toString(),
-            onValueChange = { v -> v.toIntOrNull()?.let(actions::setTotalRows) },
-            label = { Text("Total Rows") }
-        )
-
+        if (state.title.isNotEmpty()) {
+            Text(
+                text = state.title,
+                style = MaterialTheme.typography.titleLarge,
+                modifier = Modifier.padding(bottom = 8.dp)
+            )
+        }
         RowProgressIndicator(
             progress = state.rowProgress
         )
 
-        // Stitches Counter Section
         CounterView(
             modifier = Modifier.weight(1f),
             label = "Stitches",
@@ -75,7 +61,6 @@ fun DoubleCounterPortraitLayout(
             onAdjustmentClick = { actions.changeAdjustment(CounterType.STITCH, it) }
         )
 
-        // Rows Counter Section
         CounterView(
             modifier = Modifier.weight(1f),
             label = "Rows/Rounds",
@@ -103,8 +88,6 @@ private fun DoubleCounterPortraitPreview() {
     StitchCounterV3Theme {
         Surface(modifier = Modifier.fillMaxSize()) {
             val fakeActions = object : DoubleCounterActions {
-                override fun setTitle(title: String) {}
-                override fun setTotalRows(rows: Int) {}
                 override fun increment(type: CounterType) {}
                 override fun decrement(type: CounterType) {}
                 override fun reset(type: CounterType) {}
@@ -115,7 +98,6 @@ private fun DoubleCounterPortraitPreview() {
             
             DoubleCounterPortraitLayout(
                 state = DoubleCounterUiState(
-                    title = "Sample Project",
                     stitchCounterState = CounterState(
                         count = 42,
                         adjustment = AdjustmentAmount.FIVE

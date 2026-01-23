@@ -12,7 +12,9 @@ import com.example.stitchcounterv3.domain.usecase.UpsertProject
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -23,16 +25,11 @@ import kotlinx.coroutines.launch
 data class DoubleCounterUiState(
     val id: Int = 0,
     val title: String = "",
-    val titleError: String? = null,
     val stitchCounterState: CounterState = CounterState(),
     val rowCounterState: CounterState = CounterState(),
     val totalRows: Int = 0,
     val isLoading: Boolean = false,
 ) {
-    /**
-     * Calculated progress for row completion (0f to 1f).
-     * Returns null if totalRows is not set (0), indicating progress should not be shown.
-     */
     val rowProgress: Float? = if (totalRows > 0) {
         (rowCounterState.count.toFloat() / totalRows.toFloat()).coerceIn(0f, 1f)
     } else {
@@ -56,10 +53,16 @@ open class DoubleCounterViewModel @Inject constructor(
     
     private val _dismissalResult = Channel<DismissalResult>(Channel.BUFFERED)
     val dismissalResult = _dismissalResult.receiveAsFlow()
+    
+    private var autoSaveJob: Job? = null
+    private val autoSaveDelayMs = 1000L // 1 second debounce
 
     fun loadProject(projectId: Int?) {
         viewModelScope.launch {
-            if (projectId == null || projectId == 0) return@launch
+            if (projectId == null || projectId == 0) {
+                resetState()
+                return@launch
+            }
             _uiState.update { currentState -> currentState.copy(isLoading = true) }
             val project = getProject(projectId)
             if (project != null) {
@@ -85,29 +88,6 @@ open class DoubleCounterViewModel @Inject constructor(
         }
     }
 
-    override fun setTitle(title: String) { 
-        _uiState.update { currentState -> 
-            currentState.copy(
-                title = title,
-                titleError = null // Clear error when user types
-            )
-        } 
-    }
-    
-    private fun validateTitle(): Boolean {
-        val title = _uiState.value.title.trim()
-        return if (title.isEmpty()) {
-            _uiState.update { it.copy(titleError = "You have to have a title") }
-            false
-        } else {
-            _uiState.update { it.copy(titleError = null) }
-            true
-        }
-    }
-    
-    override fun setTotalRows(rows: Int) { 
-        _uiState.update { currentState -> currentState.copy(totalRows = rows.coerceAtLeast(0)) } 
-    }
 
     private fun updateCounter(type: CounterType, update: (CounterState) -> CounterState) {
         _uiState.update { currentState ->
@@ -120,6 +100,7 @@ open class DoubleCounterViewModel @Inject constructor(
                 )
             }
         }
+        triggerAutoSave()
     }
 
     override fun increment(type: CounterType) = updateCounter(type) { it.increment() }
@@ -127,22 +108,32 @@ open class DoubleCounterViewModel @Inject constructor(
     override fun reset(type: CounterType) = updateCounter(type) { it.reset() }
     override fun changeAdjustment(type: CounterType, value: AdjustmentAmount) = 
         updateCounter(type) { it.copy(adjustment = value) }
+    
+    private fun triggerAutoSave() {
+        autoSaveJob?.cancel()
+        val state = _uiState.value
+        if (state.id > 0) {
+            autoSaveJob = viewModelScope.launch {
+                delay(autoSaveDelayMs)
+                save()
+            }
+        }
+    }
 
     override fun save() {
-        if (!validateTitle()) {
-            return
-        }
         viewModelScope.launch {
             val s = _uiState.value
+            val existingProject = if (s.id > 0) getProject(s.id) else null
             val project = Project(
                 id = s.id,
                 type = ProjectType.DOUBLE,
-                title = s.title.trim(),
+                title = existingProject?.title ?: "",
                 stitchCounterNumber = s.stitchCounterState.count,
                 stitchAdjustment = s.stitchCounterState.adjustment.adjustmentAmount,
                 rowCounterNumber = s.rowCounterState.count,
                 rowAdjustment = s.rowCounterState.adjustment.adjustmentAmount,
-                totalRows = s.totalRows,
+                totalRows = existingProject?.totalRows ?: s.totalRows,
+                imagePath = existingProject?.imagePath
             )
             val newId = upsertProject(project).toInt()
             if (s.id == 0 && newId > 0) {
@@ -151,29 +142,21 @@ open class DoubleCounterViewModel @Inject constructor(
         }
     }
     
-    /**
-     * Attempts to dismiss the bottom sheet. Validates title and saves if valid.
-     * Returns true if dismissal is allowed, false if blocked due to validation error.
-     */
     fun attemptDismissal() {
         viewModelScope.launch {
-            if (!validateTitle()) {
-                // Show discard dialog instead of blocking with error
-                _dismissalResult.send(DismissalResult.ShowDiscardDialog)
-                return@launch
-            }
-            
-            // Auto-save when dismissing with valid title
+            autoSaveJob?.cancel()
             val s = _uiState.value
+            val existingProject = if (s.id > 0) getProject(s.id) else null
             val project = Project(
                 id = s.id,
                 type = ProjectType.DOUBLE,
-                title = s.title.trim(),
+                title = existingProject?.title ?: "",
                 stitchCounterNumber = s.stitchCounterState.count,
                 stitchAdjustment = s.stitchCounterState.adjustment.adjustmentAmount,
                 rowCounterNumber = s.rowCounterState.count,
                 rowAdjustment = s.rowCounterState.adjustment.adjustmentAmount,
-                totalRows = s.totalRows,
+                totalRows = existingProject?.totalRows ?: s.totalRows,
+                imagePath = existingProject?.imagePath
             )
             val newId = upsertProject(project).toInt()
             if (s.id == 0 && newId > 0) {
@@ -183,8 +166,7 @@ open class DoubleCounterViewModel @Inject constructor(
         }
     }
 
-    // Navigate back to main screen after saving
-    fun saveAndGoBack(navigator: DestinationsNavigator) {//todo I don't think I need this at all once I have it save on back swipe
+    fun saveAndGoBack(navigator: DestinationsNavigator) {
         save()
         navigator.popBackStack()
     }

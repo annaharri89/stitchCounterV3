@@ -11,7 +11,9 @@ import com.example.stitchcounterv3.domain.usecase.GetProject
 import com.example.stitchcounterv3.domain.usecase.UpsertProject
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -22,7 +24,6 @@ import kotlinx.coroutines.launch
 data class SingleCounterUiState(
     val id: Int = 0,
     val title: String = "",
-    val titleError: String? = null,
     val counterState: CounterState = CounterState(),
     val isLoading: Boolean = false,
 )
@@ -37,10 +38,16 @@ open class SingleCounterViewModel @Inject constructor(
     
     private val _dismissalResult = Channel<DismissalResult>(Channel.BUFFERED)
     val dismissalResult = _dismissalResult.receiveAsFlow()
+    
+    private var autoSaveJob: Job? = null
+    private val autoSaveDelayMs = 1000L // 1 second debounce
 
     fun loadProject(projectId: Int?) {
         viewModelScope.launch {
-            if (projectId == null || projectId == 0) return@launch
+            if (projectId == null || projectId == 0) {
+                resetState()
+                return@launch
+            }
             _uiState.update { currentState -> currentState.copy(isLoading = true) }
             val project = getProject(projectId)
             if (project != null) {
@@ -61,25 +68,6 @@ open class SingleCounterViewModel @Inject constructor(
         }
     }
 
-    override fun setTitle(title: String) {
-        _uiState.update { currentState -> 
-            currentState.copy(
-                title = title,
-                titleError = null // Clear error when user types
-            )
-        }
-    }
-    
-    private fun validateTitle(): Boolean {
-        val title = _uiState.value.title.trim()
-        return if (title.isEmpty()) {
-            _uiState.update { it.copy(titleError = "You have to have a title") }
-            false
-        } else {
-            _uiState.update { it.copy(titleError = null) }
-            true
-        }
-    }
 
     override fun changeAdjustment(value: AdjustmentAmount) {
         _uiState.update { currentState ->
@@ -87,6 +75,7 @@ open class SingleCounterViewModel @Inject constructor(
                 counterState = currentState.counterState.copy(adjustment = value)
             )
         }
+        triggerAutoSave()
     }
 
     override fun increment() {
@@ -95,6 +84,7 @@ open class SingleCounterViewModel @Inject constructor(
                 counterState = currentState.counterState.increment()
             )
         }
+        triggerAutoSave()
     }
 
     override fun decrement() {
@@ -103,6 +93,7 @@ open class SingleCounterViewModel @Inject constructor(
                 counterState = currentState.counterState.decrement()
             )
         }
+        triggerAutoSave()
     }
 
     override fun resetCount() {
@@ -111,6 +102,18 @@ open class SingleCounterViewModel @Inject constructor(
                 counterState = currentState.counterState.reset()
             )
         }
+        triggerAutoSave()
+    }
+    
+    private fun triggerAutoSave() {
+        autoSaveJob?.cancel()
+        val state = _uiState.value
+        if (state.id > 0) {
+            autoSaveJob = viewModelScope.launch {
+                delay(autoSaveDelayMs)
+                save()
+            }
+        }
     }
 
     fun resetState() {
@@ -118,17 +121,16 @@ open class SingleCounterViewModel @Inject constructor(
     }
 
     override fun save() {
-        if (!validateTitle()) {
-            return
-        }
         viewModelScope.launch {
             val state = _uiState.value
+            val existingProject = if (state.id > 0) getProject(state.id) else null
             val project = Project(
                 id = state.id,
                 type = ProjectType.SINGLE,
-                title = state.title.trim(),
+                title = existingProject?.title ?: "",
                 stitchCounterNumber = state.counterState.count,
                 stitchAdjustment = state.counterState.adjustment.adjustmentAmount,
+                imagePath = existingProject?.imagePath
             )
             val newId = upsertProject(project).toInt()
             if (state.id == 0 && newId > 0) {
@@ -137,26 +139,18 @@ open class SingleCounterViewModel @Inject constructor(
         }
     }
     
-    /**
-     * Attempts to dismiss the bottom sheet. Validates title and saves if valid.
-     * Returns true if dismissal is allowed, false if blocked due to validation error.
-     */
     fun attemptDismissal() {
         viewModelScope.launch {
-            if (!validateTitle()) {
-                // Show discard dialog instead of blocking with error
-                _dismissalResult.send(DismissalResult.ShowDiscardDialog)
-                return@launch
-            }
-            
-            // Auto-save when dismissing with valid title
+            autoSaveJob?.cancel()
             val state = _uiState.value
+            val existingProject = if (state.id > 0) getProject(state.id) else null
             val project = Project(
                 id = state.id,
                 type = ProjectType.SINGLE,
-                title = state.title.trim(),
+                title = existingProject?.title ?: "",
                 stitchCounterNumber = state.counterState.count,
                 stitchAdjustment = state.counterState.adjustment.adjustmentAmount,
+                imagePath = existingProject?.imagePath
             )
             val newId = upsertProject(project).toInt()
             if (state.id == 0 && newId > 0) {

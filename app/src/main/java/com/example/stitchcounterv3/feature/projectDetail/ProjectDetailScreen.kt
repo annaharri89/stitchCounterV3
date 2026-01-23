@@ -11,8 +11,10 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.AddPhotoAlternate
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -42,7 +44,8 @@ fun ProjectDetailContent(
     showDiscardDialog: Boolean,
     onDismissDiscardDialog: () -> Unit,
     onDiscard: () -> Unit,
-    onCreateProject: (() -> Unit)?
+    onCreateProject: (() -> Unit)?,
+    onNavigateBack: ((Int) -> Unit)?
 ) {
     val imagePickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
@@ -64,7 +67,13 @@ fun ProjectDetailContent(
 
         val isNewProject = uiState.project?.id == null || uiState.project.id == 0
 
-        ProjectDetailTopBar(isNewProject)
+        ProjectDetailTopBar(
+            isNewProject = isNewProject,
+            onCloseClick = if (isNewProject) { { viewModel.attemptDismissal() } } else null,
+            onBackClick = if (!isNewProject && uiState.project?.id != null && onNavigateBack != null) {
+                { onNavigateBack(uiState.project.id) }
+            } else null
+        )
 
         OutlinedTextField(
             value = uiState.title,
@@ -318,20 +327,47 @@ fun ProjectDetailScreen(
             showDiscardDialog = false
             navigator.popBackStack()
         },
-        onCreateProject = null
+        onCreateProject = null,
+        onNavigateBack = null
     )
 }
 
 @Composable
-private fun ProjectDetailTopBar(isNewProject: Boolean) {
-    Row {
+private fun ProjectDetailTopBar(
+    isNewProject: Boolean,
+    onCloseClick: (() -> Unit)?,
+    onBackClick: (() -> Unit)?
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        if (onBackClick != null) {
+            IconButton(onClick = onBackClick) {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                    contentDescription = "Back"
+                )
+            }
+        } else {
+            Spacer(modifier = Modifier.size(48.dp))
+        }
+        
         Text(
-            text = if (isNewProject) {
-                "New Project"
-            } else {
-                "Project Details"
-            },
+            text = "Project Details",
             style = MaterialTheme.typography.headlineMedium
         )
+        
+        if (onCloseClick != null) {
+            IconButton(onClick = onCloseClick) {
+                Icon(
+                    imageVector = Icons.Default.Close,
+                    contentDescription = "Close"
+                )
+            }
+        } else {
+            Spacer(modifier = Modifier.size(48.dp))
+        }
     }
 }

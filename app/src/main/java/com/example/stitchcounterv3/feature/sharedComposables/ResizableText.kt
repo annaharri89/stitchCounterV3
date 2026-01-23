@@ -30,7 +30,6 @@ fun ResizableText(
         val availableHeight = maxHeight
         val availableWidth = maxWidth
         
-        // Calculate font size based on available space
         val fontSize = min(
             availableHeight.value * heightRatio, // Use specified ratio of available height
             availableWidth.value * widthRatio // Use specified ratio of available width

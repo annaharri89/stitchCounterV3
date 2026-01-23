@@ -4,9 +4,8 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -18,11 +17,9 @@ import com.example.stitchcounterv3.domain.model.AdjustmentAmount
 import com.example.stitchcounterv3.domain.model.CounterState
 import com.example.stitchcounterv3.feature.sharedComposables.BottomActionButtons
 import com.example.stitchcounterv3.feature.sharedComposables.CounterView
-import com.example.stitchcounterv3.feature.sharedComposables.IncreaseDecreaseButtons
 import com.example.stitchcounterv3.ui.theme.StitchCounterV3Theme
 
 interface SingleCounterActions {
-    fun setTitle(title: String)
     fun increment()
     fun decrement()
     fun resetCount()
@@ -36,19 +33,17 @@ fun SingleCounterPortraitLayout(
     actions: SingleCounterActions
 ) {
     Column(
-        modifier = Modifier.padding(24.dp),
+        modifier = Modifier.padding(horizontal = 24.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        OutlinedTextField(
-            modifier = Modifier.fillMaxWidth(),
-            value = state.title,
-            onValueChange = actions::setTitle,
-            label = { Text("Project Name") },
-            isError = state.titleError != null,
-            supportingText = state.titleError?.let { { Text(it) } }
-        )
-
+        if (state.title.isNotEmpty()) {
+            Text(
+                text = state.title,
+                style = MaterialTheme.typography.titleLarge,
+                modifier = Modifier.padding(bottom = 8.dp)
+            )
+        }
         CounterView(
             modifier = Modifier.weight(1f),
             count = state.counterState.count,
@@ -76,7 +71,6 @@ private fun SingleCounterPortraitPreview() {
     StitchCounterV3Theme {
         Surface(modifier = Modifier.fillMaxSize()) {
             val fakeActions = object : SingleCounterActions {
-                override fun setTitle(title: String) {}
                 override fun increment() {}
                 override fun decrement() {}
                 override fun resetCount() {}
@@ -86,7 +80,6 @@ private fun SingleCounterPortraitPreview() {
             
             SingleCounterPortraitLayout(
                 state = SingleCounterUiState(
-                    title = "Sample Project",
                     counterState = CounterState(
                         count = 42,
                         adjustment = AdjustmentAmount.FIVE

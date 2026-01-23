@@ -18,9 +18,6 @@ import androidx.compose.ui.unit.dp
 import com.example.stitchcounterv3.domain.model.AdjustmentAmount
 import com.example.stitchcounterv3.ui.theme.quaternary
 
-/**
- * A label, count, increase/decrease buttons, reset button, and count adjustment buttons
- */
 @Composable
 fun CounterView(
     modifier: Modifier = Modifier,

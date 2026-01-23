@@ -50,7 +50,7 @@ fun SettingsScreen(
             )
         }
         
-        items(AppTheme.values()) { theme ->
+        items(AppTheme.entries.toTypedArray()) { theme ->
             ThemeOptionCard(
                 theme = theme,
                 isSelected = uiState.selectedTheme == theme,
@@ -129,7 +129,6 @@ private fun ColorItem(themeColor: ThemeColor) {
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        // Light color circle
         Box(
             modifier = Modifier
                 .size(24.dp)
@@ -145,7 +144,6 @@ private fun ColorItem(themeColor: ThemeColor) {
         
         Spacer(modifier = Modifier.weight(1f))
         
-        // Dark color circle
         Box(
             modifier = Modifier
                 .size(24.dp)

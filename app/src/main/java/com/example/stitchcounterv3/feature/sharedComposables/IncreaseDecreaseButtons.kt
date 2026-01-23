@@ -33,12 +33,10 @@ fun IncreaseDecreaseButtons(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        // + and - buttons
         Row(
             horizontalArrangement = Arrangement.spacedBy(buttonSpacing.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Decrement button
             Button(
                 colors = ButtonDefaults.buttonColors().copy(
                     containerColor = MaterialTheme.quaternary,
@@ -58,11 +56,9 @@ fun IncreaseDecreaseButtons(
                 )
             }
             
-            // Increment button
             Button(
                 modifier = Modifier
                     .weight(1f),
-                    //.aspectRatio(2f),
                 onClick = onIncrement,
                 shape = buttonShape
             ) {
