@@ -3,6 +3,7 @@ package com.example.stitchcounterv3.feature.theme
 import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
+import androidx.compose.ui.graphics.Color
 import com.example.stitchcounterv3.domain.model.AppTheme
 import com.example.stitchcounterv3.ui.theme.*
 import javax.inject.Inject
@@ -28,6 +29,22 @@ class ThemeManager @Inject constructor() {
             AppTheme.SEA_COTTAGE -> seaCottageDarkColors()
             AppTheme.RETRO_SUMMER -> retroSummerDarkColors()
             AppTheme.PURPLE -> purpleDarkColors()
+        }
+    }
+    
+    fun getQuaternaryColor(theme: AppTheme, isDark: Boolean): Color {
+        return when (theme) {
+            AppTheme.SEA_COTTAGE -> if (isDark) SeaCottageWhaleDark80 else SeaCottageWhaleDark40
+            AppTheme.RETRO_SUMMER -> if (isDark) RetroSummerOrangeDark80 else RetroSummerOrangeDark40
+            AppTheme.PURPLE -> if (isDark) PurpleViolet80 else PurpleViolet40
+        }
+    }
+    
+    fun getOnQuaternaryColor(theme: AppTheme, isDark: Boolean): Color {
+        return when (theme) {
+            AppTheme.SEA_COTTAGE -> Color.White // Dark blue needs white text
+            AppTheme.RETRO_SUMMER -> Color.White // Orange-red needs white text
+            AppTheme.PURPLE -> if (isDark) Color.Black else Color.White // Light purple-pink in dark theme needs black, dark in light theme needs white
         }
     }
     

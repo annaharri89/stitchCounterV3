@@ -47,7 +47,9 @@ fun DoubleCounterPortraitLayout(
             modifier = Modifier.fillMaxWidth(),
             value = state.title,
             onValueChange = actions::setTitle,
-            label = { Text("Project Name") }
+            label = { Text("Project Name") },
+            isError = state.titleError != null,
+            supportingText = state.titleError?.let { { Text(it) } }
         )
         
         OutlinedTextField(

@@ -8,7 +8,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.example.stitchcounterv3.feature.navigation.RootNavigationViewModel
 import com.example.stitchcounterv3.feature.navigation.SheetScreen
-import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.stitchcounterv3.feature.navigation.RootNavGraph
 import com.ramcosta.composedestinations.annotation.Destination
 
@@ -31,15 +30,13 @@ fun MainScreen(
             Text("Stitch Counter", style = MaterialTheme.typography.headlineMedium)
 
             Button(onClick = {
-                // Request SingleCounter bottom sheet (no project ID for new projects)
-                viewModel.showBottomSheet(SheetScreen.SingleCounter())
+                viewModel.showBottomSheet(SheetScreen.ProjectDetail(projectId = null, projectType = com.example.stitchcounterv3.domain.model.ProjectType.SINGLE))
             }) {
                 Text("New Single Tracker")
             }
 
             Button(onClick = {
-                // Request DoubleCounter bottom sheet (no project ID for new projects)
-                viewModel.showBottomSheet(SheetScreen.DoubleCounter())
+                viewModel.showBottomSheet(SheetScreen.ProjectDetail(projectId = null, projectType = com.example.stitchcounterv3.domain.model.ProjectType.DOUBLE))
             }) {
                 Text("New Double Tracker")
             }

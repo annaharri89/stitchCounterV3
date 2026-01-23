@@ -5,9 +5,25 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.ui.graphics.Color
 import com.example.stitchcounterv3.domain.model.AppTheme
 import com.example.stitchcounterv3.feature.theme.ThemeManager
+
+/**
+ * CompositionLocal for quaternary color, accessible via MaterialTheme extension
+ */
+val LocalQuaternaryColor = compositionLocalOf<Color> { 
+    error("No quaternary color provided") 
+}
+
+/**
+ * CompositionLocal for onQuaternary color, accessible via MaterialTheme extension
+ */
+val LocalOnQuaternaryColor = compositionLocalOf<Color> { 
+    error("No onQuaternary color provided") 
+}
 
 // Resources - Theme Colors
 fun seaCottageLightColors() = lightColorScheme(
@@ -15,7 +31,7 @@ fun seaCottageLightColors() = lightColorScheme(
     secondary = SeaCottageMint40,
     tertiary = SeaCottageWhaleLight40,
     primaryContainer = SeaCottagePrimaryContainer40,
-    error = SeaCottageWhaleDark40,
+    error = SeaCottageError40,
     onError = Color.White,
     onPrimary = Color.White,
     onSecondary = Color.White,
@@ -28,7 +44,7 @@ fun seaCottageDarkColors() = darkColorScheme(
     secondary = SeaCottageMint80,
     tertiary = SeaCottageWhaleLight80,
     primaryContainer = SeaCottagePrimaryContainer80,
-    error = SeaCottageWhaleDark80,
+    error = SeaCottageError80,
     onPrimary = Color.Black,
     onSecondary = Color.Black,
     onTertiary = Color.White,
@@ -41,7 +57,8 @@ fun retroSummerLightColors() = lightColorScheme(
     tertiary = RetroSummerOrangeLight40,
     onTertiary = Color.White,
     primaryContainer = RetroSummerPrimaryContainer40,
-    error = RetroSummerOrangeDark40,
+    error = RetroSummerError40,
+    onError = Color.White,
     onPrimary = Color.White,
     onSecondary = Color.White
 )
@@ -51,7 +68,8 @@ fun retroSummerDarkColors() = darkColorScheme(
     secondary = RetroSummerSun80,
     tertiary = RetroSummerOrangeLight80,
     primaryContainer = RetroSummerPrimaryContainer80,
-    error = RetroSummerOrangeDark80,
+    error = RetroSummerError80,
+    onError = Color.White,
     onPrimary = Color.White,
     onSecondary = Color.Black,
     onTertiary = Color.White
@@ -62,7 +80,8 @@ fun purpleLightColors() = lightColorScheme(
     secondary = PurpleGrey40,
     tertiary = Pink40,
     primaryContainer = PurplePrimaryContainer40,
-    error = PurpleViolet40,
+    error = PurpleError40,
+    onError = Color.White,
     onPrimary = Color.White,
     onSecondary = Color.White,
     onTertiary = Color.White
@@ -73,12 +92,12 @@ fun purpleDarkColors() = darkColorScheme(
     secondary = PurpleGrey80,
     tertiary = Pink80,
     primaryContainer = PurplePrimaryContainer80,
-    error = PurpleViolet80,
-    onPrimary = Color.White,
-    onSecondary = Color.White,
-    onTertiary = Color.White
+    error = PurpleError80,
+    onError = Color.White,
+    onPrimary = Color.Black,
+    onSecondary = Color.Black,
+    onTertiary = Color.Black
 )
-
 
 /**
  * Main theme composable that applies the selected color scheme app-wide.
@@ -97,10 +116,37 @@ fun StitchCounterV3Theme(
         darkTheme -> themeManager.getDarkColorScheme(theme)
         else -> themeManager.getLightColorScheme(theme)
     }
+    
+    val quaternaryColor = when {
+        darkTheme -> themeManager.getQuaternaryColor(theme, isDark = true)
+        else -> themeManager.getQuaternaryColor(theme, isDark = false)
+    }
+    
+    val onQuaternaryColor = when {
+        darkTheme -> themeManager.getOnQuaternaryColor(theme, isDark = true)
+        else -> themeManager.getOnQuaternaryColor(theme, isDark = false)
+    }
 
-    MaterialTheme(
-        colorScheme = colorScheme,
-        typography = Typography,
-        content = content
-    )
+    CompositionLocalProvider(
+        LocalQuaternaryColor provides quaternaryColor,
+        LocalOnQuaternaryColor provides onQuaternaryColor
+    ) {
+        MaterialTheme(
+            colorScheme = colorScheme,
+            typography = Typography,
+            content = content
+        )
+    }
 }
+
+/**
+ * Extension property to access quaternary color via MaterialTheme
+ */
+val MaterialTheme.quaternary: Color
+    @Composable get() = LocalQuaternaryColor.current
+
+/**
+ * Extension property to access onQuaternary color via MaterialTheme
+ */
+val MaterialTheme.onQuaternary: Color
+    @Composable get() = LocalOnQuaternaryColor.current

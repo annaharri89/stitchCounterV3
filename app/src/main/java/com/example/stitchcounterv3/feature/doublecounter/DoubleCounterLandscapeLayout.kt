@@ -39,7 +39,9 @@ fun DoubleCounterLandscapeLayout(
                 value = state.title,
                 onValueChange = actions::setTitle,
                 label = { Text("Project Name") },
-                modifier = Modifier.weight(1f)
+                modifier = Modifier.weight(1f),
+                isError = state.titleError != null,
+                supportingText = state.titleError?.let { { Text(it) } }
             )
 
             OutlinedTextField(

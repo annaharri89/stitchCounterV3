@@ -16,6 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.example.stitchcounterv3.domain.model.AdjustmentAmount
+import com.example.stitchcounterv3.ui.theme.quaternary
 
 /**
  * A label, count, increase/decrease buttons, reset button, and count adjustment buttons
@@ -98,7 +99,7 @@ fun CounterView(
                 if (showResetButton) {
                     Button(
                         colors = ButtonDefaults.buttonColors(
-                            containerColor = MaterialTheme.colorScheme.error,
+                            containerColor = MaterialTheme.quaternary,
                             contentColor = Color.White
                         ),
                         onClick = { onReset() },
