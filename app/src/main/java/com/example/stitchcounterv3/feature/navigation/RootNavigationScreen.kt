@@ -1,6 +1,7 @@
 package com.example.stitchcounterv3.feature.navigation
 
-import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.animation.*
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -11,6 +12,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.compose.rememberNavController
@@ -18,6 +20,7 @@ import com.example.stitchcounterv3.domain.model.DismissalResult
 import com.example.stitchcounterv3.feature.NavGraphs
 import com.example.stitchcounterv3.feature.doublecounter.DoubleCounterScreen
 import com.example.stitchcounterv3.feature.singleCounter.SingleCounterScreen
+import com.example.stitchcounterv3.feature.projectDetail.ProjectDetailContent
 import com.google.accompanist.navigation.material.ExperimentalMaterialNavigationApi
 import com.ramcosta.composedestinations.DestinationsNavHost
 import com.ramcosta.composedestinations.animations.rememberAnimatedNavHostEngine
@@ -38,49 +41,35 @@ fun RootNavigationScreen(viewModel: RootNavigationViewModel) {
     val navController = rememberNavController()
     val scope = rememberCoroutineScope()
 
-    // Track current bottom sheet
     val currentSheetScreen by viewModel.currentSheet.collectAsStateWithLifecycle()
     
-    // Track whether dismissal is allowed (prevents automatic dismissal)
-    // Use MutableState so confirmValueChange can read current value
     val isDismissalAllowedState = remember { mutableStateOf(false) }
     
-    // Track if we're currently validating a dismissal request (shared, but we'll check currentSheetScreen)
     val isValidationPending = remember { mutableStateOf(false) }
     
-    // Track current sheet value to detect if we're dismissing (Expanded -> Hidden) vs opening (Hidden -> Expanded)
     val currentSheetValue = remember { mutableStateOf<SheetValue?>(null) }
-    
-    // Track if discard dialog should be shown (shared across both screen types)
-    var showDiscardDialog by remember { mutableStateOf(false) }
 
-    // Material3 Bottom Sheet state - block hiding unless explicitly allowed
     val sheetState = rememberModalBottomSheetState(
         skipPartiallyExpanded = true,
         confirmValueChange = { target ->
-            // Only validate when trying to hide from Expanded state (user dismissing), not when opening (Hidden -> Expanded)
             val isDismissing = target == SheetValue.Hidden && currentSheetValue.value == SheetValue.Expanded
             if (isDismissing && !isDismissalAllowedState.value) {
-                // Block the dismissal and trigger validation
                 if (!isValidationPending.value) {
                     isValidationPending.value = true
                 }
                 false
             } else {
                 val allowed = target != SheetValue.Hidden || isDismissalAllowedState.value
-                // Update tracked value
                 currentSheetValue.value = target
                 allowed
             }
         }
     )
     
-    // Track sheet state changes
     LaunchedEffect(sheetState.currentValue) {
         currentSheetValue.value = sheetState.currentValue
     }
 
-    // Top-level Scaffold
     Scaffold(
         bottomBar = {
             if (isCompact) {
@@ -101,7 +90,6 @@ fun RootNavigationScreen(viewModel: RootNavigationViewModel) {
                 )
             }
 
-            // Main NavHost for normal navigation
             DestinationsNavHost(
                 navController = navController,
                 navGraph = NavGraphs.root,
@@ -113,12 +101,10 @@ fun RootNavigationScreen(viewModel: RootNavigationViewModel) {
         }
     }
 
-    // Helper function to handle dismissal results (reduces code duplication)
     fun handleDismissalResult(result: DismissalResult) {
         isValidationPending.value = false
         when (result) {
             is DismissalResult.Allowed -> {
-                // Set flag and hide - confirmValueChange will now allow it
                 isDismissalAllowedState.value = true
                 scope.launch {
                     sheetState.hide()
@@ -126,9 +112,7 @@ fun RootNavigationScreen(viewModel: RootNavigationViewModel) {
                 viewModel.showBottomSheet(null)
             }
             is DismissalResult.Blocked -> {
-                // Dismissal blocked - error already shown in UI, keep sheet open
                 isDismissalAllowedState.value = false
-                // Ensure sheet stays visible if it was trying to dismiss
                 if (sheetState.currentValue != SheetValue.Expanded) {
                     scope.launch {
                         sheetState.expand()
@@ -136,32 +120,20 @@ fun RootNavigationScreen(viewModel: RootNavigationViewModel) {
                 }
             }
             is DismissalResult.ShowDiscardDialog -> {
-                // Show discard confirmation dialog
-                showDiscardDialog = true
-                // Ensure sheet stays visible
-                if (sheetState.currentValue != SheetValue.Expanded) {
-                    scope.launch {
-                        sheetState.expand()
-                    }
-                }
             }
         }
     }
     
-    // Helper composable to set up dismissal handling for a sheet
     @Composable
     fun <T : SheetScreen> SheetDismissalHandler(
         screen: T,
         onAttemptDismissal: () -> Unit
     ) {
-        // Reset dismissal flag when screen changes
         LaunchedEffect(screen) {
             isDismissalAllowedState.value = false
             isValidationPending.value = false
-            showDiscardDialog = false
         }
         
-        // Trigger validation when pending and this is the active screen
         LaunchedEffect(isValidationPending.value, currentSheetScreen) {
             if (isValidationPending.value && currentSheetScreen == screen) {
                 onAttemptDismissal()
@@ -169,125 +141,220 @@ fun RootNavigationScreen(viewModel: RootNavigationViewModel) {
         }
     }
     
-    // Common ModalBottomSheet configuration
     val sheetShape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp)
     val sheetModifier = Modifier.fillMaxHeight(0.98f).fillMaxWidth()
     
-    // Common onDismissRequest handler
     val onDismissRequestHandler: () -> Unit = {
-        // If already allowed, let it dismiss (this handles programmatic dismissal after validation)
         if (!isDismissalAllowedState.value) {
-            // Otherwise, validate first
             isValidationPending.value = true
         }
     }
 
-    // Show bottom sheet if a sheet screen is selected
     currentSheetScreen?.let { screen ->
+        val singleCounterViewModel = hiltViewModel<com.example.stitchcounterv3.feature.singleCounter.SingleCounterViewModel>()
+        val doubleCounterViewModel = hiltViewModel<com.example.stitchcounterv3.feature.doublecounter.DoubleCounterViewModel>()
+        val projectDetailViewModel = hiltViewModel<com.example.stitchcounterv3.feature.projectDetail.ProjectDetailViewModel>()
+        val projectDetailUiState by projectDetailViewModel.uiState.collectAsStateWithLifecycle()
+        val context = LocalContext.current
+        var showDiscardDialog by remember { mutableStateOf(false) }
+        
         when (screen) {
             is SheetScreen.SingleCounter -> {
-                val singleCounterViewModel = hiltViewModel<com.example.stitchcounterv3.feature.singleCounter.SingleCounterViewModel>()
+                LaunchedEffect(screen.projectId) {
+                    singleCounterViewModel.loadProject(screen.projectId)
+                }
                 
                 SheetDismissalHandler(
                     screen = screen,
                     onAttemptDismissal = { singleCounterViewModel.attemptDismissal() }
                 )
                 
-                // Collect dismissal results
                 LaunchedEffect(screen) {
                     singleCounterViewModel.dismissalResult.collect { result ->
                         handleDismissalResult(result)
                     }
                 }
-                
-                ModalBottomSheet(
-                    onDismissRequest = onDismissRequestHandler,
-                    sheetState = sheetState,
-                    shape = sheetShape,
-                    modifier = sheetModifier
-                ) {
-                    SingleCounterScreen(
-                        projectId = screen.projectId,
-                        viewModel = singleCounterViewModel
-                    )
-                }
             }
             is SheetScreen.DoubleCounter -> {
-                val doubleCounterViewModel = hiltViewModel<com.example.stitchcounterv3.feature.doublecounter.DoubleCounterViewModel>()
+                LaunchedEffect(screen.projectId) {
+                    doubleCounterViewModel.loadProject(screen.projectId)
+                }
                 
                 SheetDismissalHandler(
                     screen = screen,
                     onAttemptDismissal = { doubleCounterViewModel.attemptDismissal() }
                 )
                 
-                // Collect dismissal results
                 LaunchedEffect(screen) {
                     doubleCounterViewModel.dismissalResult.collect { result ->
                         handleDismissalResult(result)
                     }
                 }
+            }
+            is SheetScreen.ProjectDetail -> {
+                LaunchedEffect(screen) {
+                    if (screen.projectId == null) {
+                        singleCounterViewModel.resetState()
+                        doubleCounterViewModel.resetState()
+                    }
+                    projectDetailViewModel.loadProject(screen.projectId, screen.projectType)
+                }
                 
-                ModalBottomSheet(
-                    onDismissRequest = onDismissRequestHandler,
-                    sheetState = sheetState,
-                    shape = sheetShape,
-                    modifier = sheetModifier
-                ) {
-                    DoubleCounterScreen(
-                        projectId = screen.projectId,
-                        viewModel = doubleCounterViewModel
+                SheetDismissalHandler(
+                    screen = screen,
+                    onAttemptDismissal = { projectDetailViewModel.attemptDismissal() }
+                )
+                
+                LaunchedEffect(screen) {
+                    projectDetailViewModel.dismissalResult.collect { result ->
+                        when (result) {
+                            is DismissalResult.Allowed -> {
+                                handleDismissalResult(result)
+                            }
+                            is DismissalResult.Blocked -> {
+                                handleDismissalResult(result)
+                            }
+                            is DismissalResult.ShowDiscardDialog -> {
+                                showDiscardDialog = true
+                            }
+                        }
+                    }
+                }
+                
+                var hasNavigatedToCounter by remember(screen) { mutableStateOf(false) }
+                var lastObservedProjectId by remember(screen) { mutableStateOf<Int?>(null) }
+                var initialProjectIdWhenCreatingNew by remember(screen) { mutableStateOf<Int?>(null) }
+                
+                LaunchedEffect(screen.projectId) {
+                    if (screen.projectId == null) {
+                        hasNavigatedToCounter = false
+                        lastObservedProjectId = null
+                        initialProjectIdWhenCreatingNew = projectDetailUiState.project?.id
+                    }
+                }
+                
+                LaunchedEffect(projectDetailUiState.project?.id) {
+                    val currentProjectId = projectDetailUiState.project?.id
+                    
+                    val wasNewProject = lastObservedProjectId == null || lastObservedProjectId == 0
+                    val isNowSaved = currentProjectId != null && currentProjectId > 0
+                    val isNewProjectScreen = screen.projectId == null
+                    val isProjectIdChanged = lastObservedProjectId != currentProjectId
+                    val isNotStaleProjectId = initialProjectIdWhenCreatingNew == null || 
+                        currentProjectId == null || 
+                        currentProjectId == 0 || 
+                        currentProjectId != initialProjectIdWhenCreatingNew
+                    
+                    if (isNewProjectScreen && wasNewProject && isNowSaved && isProjectIdChanged && isNotStaleProjectId && !hasNavigatedToCounter) {
+                        hasNavigatedToCounter = true
+                        
+                        when (screen.projectType) {
+                            com.example.stitchcounterv3.domain.model.ProjectType.SINGLE -> {
+                                viewModel.showBottomSheet(SheetScreen.SingleCounter(currentProjectId))
+                            }
+                            com.example.stitchcounterv3.domain.model.ProjectType.DOUBLE -> {
+                                viewModel.showBottomSheet(SheetScreen.DoubleCounter(currentProjectId))
+                            }
+                        }
+                    }
+                    
+                    lastObservedProjectId = currentProjectId
+                }
+            }
+        }
+        
+        ModalBottomSheet(
+            onDismissRequest = onDismissRequestHandler,
+            sheetState = sheetState,
+            shape = sheetShape,
+            modifier = sheetModifier
+        ) {
+            AnimatedContent(
+                targetState = screen,
+                transitionSpec = {
+                    val isGoingToDetail = targetState is SheetScreen.ProjectDetail && initialState !is SheetScreen.ProjectDetail
+                    val isGoingFromDetail = initialState is SheetScreen.ProjectDetail && targetState !is SheetScreen.ProjectDetail
+                    
+                    slideInHorizontally(
+                        initialOffsetX = { fullWidth ->
+                            if (isGoingToDetail) fullWidth else -fullWidth
+                        },
+                        animationSpec = tween(durationMillis = AnimationConstants.NAVIGATION_ANIMATION_DURATION)
+                    ) togetherWith slideOutHorizontally(
+                        targetOffsetX = { fullWidth ->
+                            if (isGoingToDetail) -fullWidth else fullWidth
+                        },
+                        animationSpec = tween(durationMillis = AnimationConstants.NAVIGATION_ANIMATION_DURATION)
                     )
+                },
+                label = "bottom_sheet_content"
+            ) { currentScreen ->
+                when (currentScreen) {
+                    is SheetScreen.SingleCounter -> {
+                        SingleCounterScreen(
+                            projectId = currentScreen.projectId,
+                            viewModel = singleCounterViewModel,
+                            onNavigateToDetail = { projectId ->
+                                viewModel.showBottomSheet(
+                                    SheetScreen.ProjectDetail(
+                                        projectId = projectId,
+                                        projectType = com.example.stitchcounterv3.domain.model.ProjectType.SINGLE
+                                    )
+                                )
+                            }
+                        )
+                    }
+                    is SheetScreen.DoubleCounter -> {
+                        DoubleCounterScreen(
+                            projectId = currentScreen.projectId,
+                            viewModel = doubleCounterViewModel,
+                            onNavigateToDetail = { projectId ->
+                                viewModel.showBottomSheet(
+                                    SheetScreen.ProjectDetail(
+                                        projectId = projectId,
+                                        projectType = com.example.stitchcounterv3.domain.model.ProjectType.DOUBLE
+                                    )
+                                )
+                            }
+                        )
+                    }
+                    is SheetScreen.ProjectDetail -> {
+                        ProjectDetailContent(
+                            uiState = projectDetailUiState,
+                            viewModel = projectDetailViewModel,
+                            context = context,
+                            showDiscardDialog = showDiscardDialog,
+                            onDismissDiscardDialog = { showDiscardDialog = false },
+                            onDiscard = {
+                                projectDetailViewModel.discardChanges()
+                                showDiscardDialog = false
+                                isDismissalAllowedState.value = true
+                                scope.launch {
+                                    sheetState.hide()
+                                }
+                                viewModel.showBottomSheet(null)
+                            },
+                            onCreateProject = null
+                        )
+                    }
                 }
             }
         }
 
-        // Automatically show sheet when currentSheetScreen changes
         LaunchedEffect(currentSheetScreen) {
             if (currentSheetScreen != null) {
-                isDismissalAllowedState.value = false // Reset flag when showing new sheet
-                showDiscardDialog = false
+                isDismissalAllowedState.value = false
                 try {
                     sheetState.show()
                 } catch (e: Exception) {
-                    // Handle error silently
                 }
             }
         }
     }
-    
-    // Discard confirmation dialog (shown outside sheet for proper rendering)
-    if (showDiscardDialog) {
-        AlertDialog(
-            onDismissRequest = { showDiscardDialog = false },
-            title = { Text("Discard project?") },
-            text = { Text("This project has no title. Do you want to discard it?") },
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        showDiscardDialog = false
-                        isDismissalAllowedState.value = true
-                        scope.launch {
-                            sheetState.hide()
-                        }
-                        viewModel.showBottomSheet(null)
-                    }
-                ) {
-                    Text("Discard")
-                }
-            },
-            dismissButton = {
-                TextButton(
-                    onClick = { showDiscardDialog = false }
-                ) {
-                    Text("Cancel")
-                }
-            }
-        )
-    }
 }
 
-// Simple sealed class to track which sheet is open
 sealed class SheetScreen {
     data class SingleCounter(val projectId: Int? = null) : SheetScreen()
     data class DoubleCounter(val projectId: Int? = null) : SheetScreen()
+    data class ProjectDetail(val projectId: Int? = null, val projectType: com.example.stitchcounterv3.domain.model.ProjectType) : SheetScreen()
 }

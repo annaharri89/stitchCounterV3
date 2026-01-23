@@ -45,5 +45,8 @@ data class ProjectEntity(
 
     @ColumnInfo(name = "total_rows")
     val totalRows: Int = 0,
+
+    @ColumnInfo(name = "image_path")
+    val imagePath: String? = null,
 )
 

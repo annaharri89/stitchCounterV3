@@ -1,27 +1,22 @@
 package com.example.stitchcounterv3.feature.navigation
 
+import android.net.http.SslCertificate.saveState
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemColors
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.navigation.NavHostController
-import com.example.stitchcounterv3.feature.NavGraphs
 import com.example.stitchcounterv3.feature.destinations.LibraryScreenDestination
 import com.example.stitchcounterv3.feature.destinations.MainScreenDestination
 import com.example.stitchcounterv3.feature.destinations.SettingsScreenDestination
-import com.ramcosta.composedestinations.DestinationsNavHost
 import com.ramcosta.composedestinations.navigation.navigate
 
 
