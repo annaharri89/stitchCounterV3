@@ -249,13 +249,55 @@ class ProjectDetailViewModel @Inject constructor(
 
     fun updateImagePath(imagePath: String?) {
         val currentTitle = _uiState.value.title
+        val currentTotalRows = _uiState.value.totalRows
         _uiState.update { currentState ->
             currentState.copy(
                 imagePath = imagePath,
-                hasUnsavedChanges = currentTitle != originalTitle || imagePath != originalImagePath
+                hasUnsavedChanges = currentTitle != originalTitle || currentTotalRows != originalTotalRows || imagePath != originalImagePath
             )
         }
         triggerAutoSave()
+    }
+
+    fun createProject() {
+        viewModelScope.launch {
+            val state = _uiState.value
+            if (state.title.isBlank()) {
+                _uiState.update { currentState ->
+                    currentState.copy(titleError = "Title is required")
+                }
+                return@launch
+            }
+            
+            val existingProject = state.project
+            val totalRowsValue = state.totalRows.toIntOrNull() ?: 0
+            val project = Project(
+                id = 0,
+                type = state.projectType,
+                title = state.title,
+                stitchCounterNumber = existingProject?.stitchCounterNumber ?: 0,
+                stitchAdjustment = existingProject?.stitchAdjustment ?: 1,
+                rowCounterNumber = existingProject?.rowCounterNumber ?: 0,
+                rowAdjustment = existingProject?.rowAdjustment ?: 1,
+                totalRows = totalRowsValue,
+                imagePath = state.imagePath
+            )
+            val newId = upsertProject(project).toInt()
+            if (newId > 0) {
+                val updatedProject = project.copy(id = newId)
+                originalTitle = state.title
+                originalTotalRows = state.totalRows
+                originalImagePath = updatedProject.imagePath
+                _uiState.update { currentState ->
+                    currentState.copy(
+                        project = updatedProject,
+                        imagePath = updatedProject.imagePath,
+                        hasUnsavedChanges = false,
+                        titleError = null
+                    )
+                }
+            }
+        }
     }
 }
 

@@ -164,7 +164,7 @@ fun ProjectDetailContent(
 
         Spacer(modifier = Modifier.weight(1f))
 
-        val projectNotCreated = onCreateProject != null && uiState.project?.id != null && uiState.project.id > 0
+        val projectNotCreated = onCreateProject != null && isNewProject
 
         if (projectNotCreated) {
             Button(

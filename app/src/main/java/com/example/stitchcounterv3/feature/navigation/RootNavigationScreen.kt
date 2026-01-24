@@ -334,7 +334,9 @@ fun RootNavigationScreen(viewModel: RootNavigationViewModel) {
                                 }
                                 viewModel.showBottomSheet(null)
                             },
-                            onCreateProject = null,
+                            onCreateProject = {
+                                projectDetailViewModel.createProject()
+                            },
                             onNavigateBack = { projectId ->
                                 when (projectDetailUiState.project?.type) {
                                     com.example.stitchcounterv3.domain.model.ProjectType.SINGLE -> {
