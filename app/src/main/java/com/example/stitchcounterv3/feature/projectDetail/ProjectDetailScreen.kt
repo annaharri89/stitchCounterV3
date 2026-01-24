@@ -25,11 +25,20 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.activity.compose.BackHandler
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
+import com.example.stitchcounterv3.domain.model.ProjectType
 import com.example.stitchcounterv3.feature.navigation.RootNavGraph
+import com.example.stitchcounterv3.feature.sharedComposables.RowProgressIndicator
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import java.io.File
@@ -66,6 +75,9 @@ fun ProjectDetailContent(
     ) {
 
         val isNewProject = uiState.project?.id == null || uiState.project.id == 0
+        val isDoubleCounter = uiState.projectType == ProjectType.DOUBLE
+        val keyboardController = LocalSoftwareKeyboardController.current
+        val totalRowsFocusRequester = remember { FocusRequester() }
 
         ProjectDetailTopBar(
             isNewProject = isNewProject,
@@ -83,8 +95,57 @@ fun ProjectDetailContent(
             singleLine = true,
             placeholder = { Text("Enter project title") },
             isError = uiState.titleError != null,
-            supportingText = uiState.titleError?.let { { Text(it) } }
+            supportingText = uiState.titleError?.let { { Text(it) } },
+            keyboardOptions = KeyboardOptions(
+                imeAction = if (isDoubleCounter) ImeAction.Next else ImeAction.Done
+            ),
+            keyboardActions = KeyboardActions(
+                onNext = {
+                    if (isDoubleCounter) {
+                        totalRowsFocusRequester.requestFocus()
+                    }
+                },
+                onDone = {
+                    keyboardController?.hide()
+                }
+            )
         )
+
+        if (isDoubleCounter) {
+            OutlinedTextField(
+                value = uiState.totalRows,
+                onValueChange = { viewModel.updateTotalRows(it) },
+                label = { Text("Total Rows") },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .focusRequester(totalRowsFocusRequester),
+                singleLine = true,
+                placeholder = { Text("Enter total rows") },
+                keyboardOptions = KeyboardOptions(
+                    imeAction = ImeAction.Done,
+                    keyboardType = KeyboardType.Number
+                ),
+                keyboardActions = KeyboardActions(
+                    onDone = {
+                        keyboardController?.hide()
+                    }
+                )
+            )
+            
+            val rowProgress: Float? = uiState.project?.let { project ->
+                val totalRowsValue = project.totalRows
+                if (totalRowsValue > 0) {
+                    (project.rowCounterNumber.toFloat() / totalRowsValue.toFloat()).coerceIn(0f, 1f)
+                } else {
+                    null
+                }
+            }
+            
+            RowProgressIndicator(
+                progress = rowProgress,
+                modifier = Modifier.fillMaxWidth()
+            )
+        }
 
         ProjectImageSelector(
             imagePath = uiState.imagePath,
@@ -108,7 +169,8 @@ fun ProjectDetailContent(
         if (projectNotCreated) {
             Button(
                 onClick = onCreateProject,
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                enabled = uiState.title.isNotBlank()
             ) {
                 Text("Create Project")
             }
