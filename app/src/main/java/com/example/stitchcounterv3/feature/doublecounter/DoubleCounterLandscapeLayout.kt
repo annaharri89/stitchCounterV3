@@ -68,7 +68,6 @@ fun DoubleCounterLandscapeLayout(
 
         BottomActionButtons(
             onResetAll = actions::resetAll,
-            onSave = actions::save,
             labelText = "Reset All"
         )
     }
@@ -85,7 +84,6 @@ private fun DoubleCounterLandscapePreview() {
                 override fun reset(type: CounterType) {}
                 override fun changeAdjustment(type: CounterType, value: AdjustmentAmount) {}
                 override fun resetAll() {}
-                override fun save() {}
             }
             
             DoubleCounterLandscapeLayout(

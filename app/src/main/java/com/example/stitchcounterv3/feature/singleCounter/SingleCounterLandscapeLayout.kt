@@ -47,8 +47,7 @@ fun SingleCounterLandscapeLayout(
         )
 
         BottomActionButtons(
-            onResetAll = actions::resetCount,
-            onSave = actions::save
+            onResetAll = actions::resetCount
         )
     }
 }
@@ -63,7 +62,6 @@ private fun SingleCounterLandscapeScreenPreview() {
                 override fun decrement() {}
                 override fun resetCount() {}
                 override fun changeAdjustment(value: AdjustmentAmount) {}
-                override fun save() {}
             }
             
             SingleCounterLandscapeLayout(

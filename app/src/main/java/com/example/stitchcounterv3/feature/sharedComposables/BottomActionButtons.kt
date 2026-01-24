@@ -16,8 +16,7 @@ import com.example.stitchcounterv3.ui.theme.quaternary
 
 @Composable
 fun BottomActionButtons(labelText: String = "Reset",
-                        onResetAll: () -> Unit,
-                        onSave: () -> Unit) {
+                        onResetAll: () -> Unit) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(12.dp)
@@ -28,16 +27,9 @@ fun BottomActionButtons(labelText: String = "Reset",
                 contentColor = MaterialTheme.onQuaternary
             ),
             onClick = { onResetAll.invoke() },
-            modifier = Modifier.weight(1f)
+            modifier = Modifier.fillMaxWidth()
         ) {
             Text(labelText)
-        }
-
-        Button(
-            onClick = { onSave.invoke() },
-            modifier = Modifier.weight(1f)
-        ) {
-            Text("Save")
         }
     }
 }

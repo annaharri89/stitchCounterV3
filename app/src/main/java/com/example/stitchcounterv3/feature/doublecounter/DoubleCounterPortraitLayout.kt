@@ -26,7 +26,6 @@ interface DoubleCounterActions {
     fun reset(type: CounterType)
     fun changeAdjustment(type: CounterType, value: AdjustmentAmount)
     fun resetAll()
-    fun save()
 }
 
 @Composable
@@ -76,7 +75,6 @@ fun DoubleCounterPortraitLayout(
 
         BottomActionButtons(
             onResetAll = actions::resetAll,
-            onSave = actions::save,
             labelText = "Reset All"
         )
     }
@@ -93,7 +91,6 @@ private fun DoubleCounterPortraitPreview() {
                 override fun reset(type: CounterType) {}
                 override fun changeAdjustment(type: CounterType, value: AdjustmentAmount) {}
                 override fun resetAll() {}
-                override fun save() {}
             }
             
             DoubleCounterPortraitLayout(

@@ -24,7 +24,6 @@ interface SingleCounterActions {
     fun decrement()
     fun resetCount()
     fun changeAdjustment(value: AdjustmentAmount)
-    fun save()
 }
 
 @Composable
@@ -59,8 +58,7 @@ fun SingleCounterPortraitLayout(
         Spacer(modifier = Modifier.weight(.5f))
 
         BottomActionButtons(
-            onResetAll = actions::resetCount,
-            onSave = actions::save
+            onResetAll = actions::resetCount
         )
     }
 }
@@ -75,7 +73,6 @@ private fun SingleCounterPortraitPreview() {
                 override fun decrement() {}
                 override fun resetCount() {}
                 override fun changeAdjustment(value: AdjustmentAmount) {}
-                override fun save() {}
             }
             
             SingleCounterPortraitLayout(

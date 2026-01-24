@@ -120,7 +120,7 @@ open class DoubleCounterViewModel @Inject constructor(
         }
     }
 
-    override fun save() {
+    private fun save() {
         viewModelScope.launch {
             val s = _uiState.value
             val existingProject = if (s.id > 0) getProject(s.id) else null
@@ -167,8 +167,10 @@ open class DoubleCounterViewModel @Inject constructor(
     }
 
     fun saveAndGoBack(navigator: DestinationsNavigator) {
-        save()
-        navigator.popBackStack()
+        viewModelScope.launch {
+            save()
+            navigator.popBackStack()
+        }
     }
 
     fun resetState() {

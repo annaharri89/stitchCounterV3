@@ -120,7 +120,7 @@ open class SingleCounterViewModel @Inject constructor(
         _uiState.update { _ -> SingleCounterUiState() }
     }
 
-    override fun save() {
+    private fun save() {
         viewModelScope.launch {
             val state = _uiState.value
             val existingProject = if (state.id > 0) getProject(state.id) else null
