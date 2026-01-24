@@ -28,6 +28,7 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.SelectAll
 import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.FolderOpen
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -99,45 +100,54 @@ fun LibraryScreen(
                 )
             } else {
                 LibraryTopBar(
-                    onEnterMultiSelect = { viewModel.toggleMultiSelectMode() }
+                    onEnterMultiSelect = { viewModel.toggleMultiSelectMode() },
+                    hasProjects = projects.isNotEmpty()
                 )
             }
         }
     ) { paddingValues ->
         Surface(modifier = Modifier.fillMaxSize()) {
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues)
-                    .padding(horizontal = 16.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                items(projects) { project ->
-                    SwipeableProjectRow(
-                        project = project,
-                        isSelected = uiState.selectedProjectIds.contains(project.id),
-                        isMultiSelectMode = uiState.isMultiSelectMode,
-                        onOpen = { 
-                            if (!uiState.isMultiSelectMode) {
-                                when (project.type) {
-                                    ProjectType.SINGLE -> {
-                                        rootNavigationViewModel.showBottomSheet(SheetScreen.SingleCounter(project.id))
-                                    }
-                                    ProjectType.DOUBLE -> {
-                                        rootNavigationViewModel.showBottomSheet(SheetScreen.DoubleCounter(project.id))
+            if (projects.isEmpty()) {
+                EmptyLibraryState(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(paddingValues)
+                )
+            } else {
+                LazyColumn(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(paddingValues)
+                        .padding(horizontal = 16.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    items(projects) { project ->
+                        SwipeableProjectRow(
+                            project = project,
+                            isSelected = uiState.selectedProjectIds.contains(project.id),
+                            isMultiSelectMode = uiState.isMultiSelectMode,
+                            onOpen = { 
+                                if (!uiState.isMultiSelectMode) {
+                                    when (project.type) {
+                                        ProjectType.SINGLE -> {
+                                            rootNavigationViewModel.showBottomSheet(SheetScreen.SingleCounter(project.id))
+                                        }
+                                        ProjectType.DOUBLE -> {
+                                            rootNavigationViewModel.showBottomSheet(SheetScreen.DoubleCounter(project.id))
+                                        }
                                     }
                                 }
+                            },
+                            onSelect = { viewModel.toggleProjectSelection(project.id) },
+                            onDelete = { viewModel.requestDelete(project) },
+                            onToggleMultiSelect = { viewModel.toggleMultiSelectMode() },
+                            onInfoClick = {
+                                if (!uiState.isMultiSelectMode && project.id > 0) {
+                                    navigator.navigate(ProjectDetailScreenDestination(projectId = project.id))
+                                }
                             }
-                        },
-                        onSelect = { viewModel.toggleProjectSelection(project.id) },
-                        onDelete = { viewModel.requestDelete(project) },
-                        onToggleMultiSelect = { viewModel.toggleMultiSelectMode() },
-                        onInfoClick = {
-                            if (!uiState.isMultiSelectMode && project.id > 0) {
-                                navigator.navigate(ProjectDetailScreenDestination(projectId = project.id))
-                            }
-                        }
-                    )
+                        )
+                    }
                 }
             }
         }
@@ -361,9 +371,7 @@ private fun ProjectImageOrCheckbox(
                     .clip(RoundedCornerShape(12.dp)),
                 contentScale = ContentScale.Crop
             )
-        } else {
-            Spacer(modifier = Modifier.size(100.dp))
-        }
+        } 
     }
 }
 
@@ -519,18 +527,21 @@ private fun StatBadge(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun LibraryTopBar(
-    onEnterMultiSelect: () -> Unit
+    onEnterMultiSelect: () -> Unit,
+    hasProjects: Boolean = true
 ) {
     TopAppBar(
         title = {
             Text("Library")
         },
         actions = {
-            IconButton(onClick = onEnterMultiSelect) {
-                Icon(
-                    imageVector = Icons.Default.SelectAll,
-                    contentDescription = "Select multiple"
-                )
+            if (hasProjects) {
+                IconButton(onClick = onEnterMultiSelect) {
+                    Icon(
+                        imageVector = Icons.Default.SelectAll,
+                        contentDescription = "Select multiple"
+                    )
+                }
             }
         }
     )
@@ -596,6 +607,40 @@ private fun MultiSelectTopBar(
             }
         }
     )
+}
+
+@Composable
+private fun EmptyLibraryState(
+    modifier: Modifier = Modifier
+) {
+    Box(
+        modifier = modifier,
+        contentAlignment = Alignment.Center
+    ) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+            modifier = Modifier.padding(32.dp)
+        ) {
+            Icon(
+                imageVector = Icons.Default.FolderOpen,
+                contentDescription = null,
+                modifier = Modifier.size(80.dp),
+                tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f)
+            )
+            Text(
+                text = "No Projects Yet",
+                style = MaterialTheme.typography.headlineSmall,
+                fontWeight = FontWeight.SemiBold,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+            Text(
+                text = "Create your first project to start tracking your stitches",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+            )
+        }
+    }
 }
 
 @Composable
