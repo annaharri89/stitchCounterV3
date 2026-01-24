@@ -100,7 +100,7 @@ fun CounterView(
                             contentColor = Color.White
                         ),
                         onClick = { onReset() },
-                        modifier = Modifier.weight(.5f).padding(end = 4.dp)
+                        modifier = Modifier.padding(end = 4.dp)
                     ) {
                         Text("Reset")
                     }
@@ -109,7 +109,7 @@ fun CounterView(
                 AdjustmentButtons(
                     selectedAdjustmentAmount = selectedAdjustmentAmount,
                     onAdjustmentClick = onAdjustmentClick,
-                    modifier = Modifier.weight(buttonsWeight)
+                    modifier = Modifier.weight(1f)
                 )
             }
         }

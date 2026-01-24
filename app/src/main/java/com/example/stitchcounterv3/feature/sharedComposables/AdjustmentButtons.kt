@@ -37,11 +37,15 @@ fun AdjustmentButtons(
                 },
             )
             Button(
-                modifier = Modifier.weight(1f).padding(horizontal = 4.dp),
+                modifier = Modifier
+                    .padding(horizontal = 4.dp),
                 colors = buttonColors,
                 onClick = { onAdjustmentClick(amount) }
             ) {
-                Text(amount.text)
+                Text(
+                    text = amount.text,
+                    maxLines = 1
+                )
             }
         }
     }
