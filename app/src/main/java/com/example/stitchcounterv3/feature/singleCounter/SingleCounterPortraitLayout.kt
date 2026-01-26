@@ -2,8 +2,10 @@ package com.example.stitchcounterv3.feature.singleCounter
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -29,19 +31,33 @@ interface SingleCounterActions {
 @Composable
 fun SingleCounterPortraitLayout(
     state: SingleCounterUiState,
-    actions: SingleCounterActions
+    actions: SingleCounterActions,
+    topBarContent: (@Composable () -> Unit)? = null
 ) {
     Column(
         modifier = Modifier.padding(horizontal = 24.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        if (state.title.isNotEmpty()) {
-            Text(
-                text = state.title,
-                style = MaterialTheme.typography.titleLarge,
-                modifier = Modifier.padding(bottom = 8.dp)
-            )
+        if (state.title.isNotEmpty() || topBarContent != null) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 8.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                if (state.title.isNotEmpty()) {
+                    Text(
+                        text = state.title,
+                        style = MaterialTheme.typography.titleLarge,
+                        modifier = Modifier.weight(1f)
+                    )
+                } else {
+                    Spacer(modifier = Modifier.weight(1f))
+                }
+                topBarContent?.invoke()
+            }
         }
         CounterView(
             modifier = Modifier.weight(1f),

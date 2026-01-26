@@ -1,6 +1,5 @@
 package com.example.stitchcounterv3.feature.doublecounter
 
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
@@ -18,7 +17,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.dp
@@ -68,38 +66,52 @@ fun DoubleCounterScreen(
     Surface(
         modifier = Modifier.height(screenHeight * 0.99f)
     ) {
-        Box {
-            AdaptiveLayout(
-                portraitContent = {
-                    DoubleCounterPortraitLayout(
-                        state = state,
-                        actions = actions
-                    )
-                },
-                landscapeContent = {
-                    DoubleCounterLandscapeLayout(
-                        state = state,
-                        actions = actions
-                    )
-                }
-            )
-            if (state.id > 0 && onNavigateToDetail != null) {
-                FloatingActionButton(
-                    onClick = {
-                        onNavigateToDetail(state.id)
-                    },
-                    modifier = Modifier
-                        .align(Alignment.TopEnd)
-                        .padding(16.dp),
-                    containerColor = MaterialTheme.colorScheme.primaryContainer
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Info,
-                        contentDescription = "Project details"
-                    )
-                }
+        AdaptiveLayout(
+            portraitContent = {
+                DoubleCounterPortraitLayout(
+                    state = state,
+                    actions = actions,
+                    topBarContent = if (state.id > 0 && onNavigateToDetail != null) {
+                        {
+                            FloatingActionButton(
+                                onClick = {
+                                    onNavigateToDetail(state.id)
+                                },
+                                modifier = Modifier.padding(start = 16.dp),
+                                containerColor = MaterialTheme.colorScheme.primaryContainer
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Info,
+                                    contentDescription = "Project details"
+                                )
+                            }
+                        }
+                    } else null
+                )
+            },
+            landscapeContent = {
+                DoubleCounterLandscapeLayout(
+                    state = state,
+                    actions = actions,
+                    topBarContent = if (state.id > 0 && onNavigateToDetail != null) {
+                        {
+                            FloatingActionButton(
+                                onClick = {
+                                    onNavigateToDetail(state.id)
+                                },
+                                modifier = Modifier.padding(start = 16.dp),
+                                containerColor = MaterialTheme.colorScheme.primaryContainer
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Info,
+                                    contentDescription = "Project details"
+                                )
+                            }
+                        }
+                    } else null
+                )
             }
-        }
+        )
     }
 
     resetDialogType?.let { type ->

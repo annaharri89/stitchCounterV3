@@ -3,12 +3,15 @@ package com.example.stitchcounterv3.feature.doublecounter
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -22,18 +25,32 @@ import com.example.stitchcounterv3.ui.theme.StitchCounterV3Theme
 @Composable
 fun DoubleCounterLandscapeLayout(
     state: DoubleCounterUiState,
-    actions: DoubleCounterActions
+    actions: DoubleCounterActions,
+    topBarContent: (@Composable () -> Unit)? = null
 ) {
     Column(modifier = Modifier
             .fillMaxSize()
             .padding(horizontal = 24.dp), verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        if (state.title.isNotEmpty()) {
-            Text(
-                text = state.title,
-                style = MaterialTheme.typography.titleLarge,
-                modifier = Modifier.padding(bottom = 8.dp)
-            )
+        if (state.title.isNotEmpty() || topBarContent != null) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 8.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                if (state.title.isNotEmpty()) {
+                    Text(
+                        text = state.title,
+                        style = MaterialTheme.typography.titleLarge,
+                        modifier = Modifier.weight(1f)
+                    )
+                } else {
+                    Spacer(modifier = Modifier.weight(1f))
+                }
+                topBarContent?.invoke()
+            }
         }
         RowProgressIndicator(
             progress = state.rowProgress
