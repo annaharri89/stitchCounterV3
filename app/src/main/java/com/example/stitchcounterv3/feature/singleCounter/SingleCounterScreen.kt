@@ -5,13 +5,19 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Info
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
@@ -30,8 +36,6 @@ fun SingleCounterScreen(
     viewModel: SingleCounterViewModel = hiltViewModel(),
     onNavigateToDetail: ((Int) -> Unit)? = null
 ) {
-    
-    
     LaunchedEffect(projectId) {
         projectId?.let {
             viewModel.loadProject(projectId)
@@ -45,16 +49,28 @@ fun SingleCounterScreen(
     val configuration = LocalConfiguration.current
     val screenHeight = configuration.screenHeightDp.dp
 
+    var showResetDialog by remember { mutableStateOf(false) }
+
+    val actions = object : SingleCounterActions {
+        override fun increment() = viewModel.increment()
+        override fun decrement() = viewModel.decrement()
+        override fun resetCount() {
+            showResetDialog = true
+        }
+        override fun changeAdjustment(value: com.example.stitchcounterv3.domain.model.AdjustmentAmount) = 
+            viewModel.changeAdjustment(value)
+    }
+
     Surface(
         modifier = Modifier.height(screenHeight * 0.99f)
     ) {
         Box {
             AdaptiveLayout(
                 portraitContent = {
-                    SingleCounterPortraitLayout(state, actions = viewModel)
+                    SingleCounterPortraitLayout(state, actions = actions)
                 },
                 landscapeContent = {
-                    SingleCounterLandscapeLayout(state, actions = viewModel)
+                    SingleCounterLandscapeLayout(state, actions = actions)
                 }
             )
             if (state.id > 0 && onNavigateToDetail != null) {
@@ -74,5 +90,30 @@ fun SingleCounterScreen(
                 }
             }
         }
+    }
+
+    if (showResetDialog) {
+        AlertDialog(
+            onDismissRequest = { showResetDialog = false },
+            title = { Text("Reset Counter?") },
+            text = { Text("Are you sure you want to reset the counter to 0?") },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        viewModel.resetCount()
+                        showResetDialog = false
+                    }
+                ) {
+                    Text("Reset")
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = { showResetDialog = false }
+                ) {
+                    Text("Cancel")
+                }
+            }
+        )
     }
 }

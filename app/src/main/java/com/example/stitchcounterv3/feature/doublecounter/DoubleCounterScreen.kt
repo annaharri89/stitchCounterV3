@@ -5,13 +5,19 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Info
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
@@ -43,6 +49,22 @@ fun DoubleCounterScreen(
     val configuration = LocalConfiguration.current
     val screenHeight = configuration.screenHeightDp.dp
 
+    var resetDialogType by remember { mutableStateOf<CounterType?>(null) }
+    var showResetAllDialog by remember { mutableStateOf(false) }
+
+    val actions = object : DoubleCounterActions {
+        override fun increment(type: CounterType) = viewModel.increment(type)
+        override fun decrement(type: CounterType) = viewModel.decrement(type)
+        override fun reset(type: CounterType) {
+            resetDialogType = type
+        }
+        override fun changeAdjustment(type: CounterType, value: com.example.stitchcounterv3.domain.model.AdjustmentAmount) = 
+            viewModel.changeAdjustment(type, value)
+        override fun resetAll() {
+            showResetAllDialog = true
+        }
+    }
+
     Surface(
         modifier = Modifier.height(screenHeight * 0.99f)
     ) {
@@ -51,13 +73,13 @@ fun DoubleCounterScreen(
                 portraitContent = {
                     DoubleCounterPortraitLayout(
                         state = state,
-                        actions = viewModel
+                        actions = actions
                     )
                 },
                 landscapeContent = {
                     DoubleCounterLandscapeLayout(
                         state = state,
-                        actions = viewModel
+                        actions = actions
                     )
                 }
             )
@@ -78,6 +100,60 @@ fun DoubleCounterScreen(
                 }
             }
         }
+    }
+
+    resetDialogType?.let { type ->
+        val counterName = when (type) {
+            CounterType.STITCH -> "Stitches"
+            CounterType.ROW -> "Rows/Rounds"
+        }
+        AlertDialog(
+            onDismissRequest = { resetDialogType = null },
+            title = { Text("Reset $counterName Counter?") },
+            text = { Text("Are you sure you want to reset the $counterName counter to 0?") },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        viewModel.reset(type)
+                        resetDialogType = null
+                    }
+                ) {
+                    Text("Reset")
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = { resetDialogType = null }
+                ) {
+                    Text("Cancel")
+                }
+            }
+        )
+    }
+
+    if (showResetAllDialog) {
+        AlertDialog(
+            onDismissRequest = { showResetAllDialog = false },
+            title = { Text("Reset All Counters?") },
+            text = { Text("Are you sure you want to reset both Stitches and Rows/Rounds counters to 0?") },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        viewModel.resetAll()
+                        showResetAllDialog = false
+                    }
+                ) {
+                    Text("Reset All")
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = { showResetAllDialog = false }
+                ) {
+                    Text("Cancel")
+                }
+            }
+        )
     }
 }
 
