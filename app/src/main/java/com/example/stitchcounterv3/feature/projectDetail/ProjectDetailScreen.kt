@@ -169,7 +169,9 @@ fun ProjectDetailContent(
         if (projectNotCreated) {
             Button(
                 onClick = onCreateProject,
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .imePadding(),
                 enabled = uiState.title.isNotBlank()
             ) {
                 Text("Create Project")
