@@ -11,11 +11,11 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -125,10 +125,13 @@ fun LibraryScreen(
                 }
                 else -> {
                     LazyColumn(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(paddingValues)
-                            .padding(horizontal = 16.dp),
+                        modifier = Modifier.fillMaxSize(),
+                        contentPadding = PaddingValues(
+                            top = paddingValues.calculateTopPadding(),
+                            bottom = 80.dp,
+                            start = 16.dp,
+                            end = 16.dp
+                        ),
                         verticalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
                         items(projects) { project ->
@@ -262,7 +265,7 @@ private fun SwipeableProjectRow(
                                     offsetX = 0f
                                 }
                             }
-                        ) { change, dragAmount ->
+                        ) { _, dragAmount ->
                             val newOffset = (offsetX + dragAmount).coerceIn(-swipeThresholdPx, 0f)
                             offsetX = newOffset
                         }
@@ -274,6 +277,7 @@ private fun SwipeableProjectRow(
 
 @Composable
 private fun ProjectRow(
+    modifier: Modifier = Modifier,
     project: Project,
     isSelected: Boolean,
     isMultiSelectMode: Boolean,
@@ -284,7 +288,6 @@ private fun ProjectRow(
     onToggleMultiSelect: () -> Unit,
     onInfoClick: () -> Unit,
     onResetSwipe: () -> Unit = {},
-    modifier: Modifier = Modifier
 ) {
     Card(
         modifier = modifier
