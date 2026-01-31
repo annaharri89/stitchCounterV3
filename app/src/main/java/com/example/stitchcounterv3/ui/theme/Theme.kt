@@ -11,21 +11,14 @@ import androidx.compose.ui.graphics.Color
 import com.example.stitchcounterv3.domain.model.AppTheme
 import com.example.stitchcounterv3.feature.theme.ThemeManager
 
-/**
- * CompositionLocal for quaternary color, accessible via MaterialTheme extension
- */
 val LocalQuaternaryColor = compositionLocalOf<Color> { 
     error("No quaternary color provided") 
 }
 
-/**
- * CompositionLocal for onQuaternary color, accessible via MaterialTheme extension
- */
 val LocalOnQuaternaryColor = compositionLocalOf<Color> { 
     error("No onQuaternary color provided") 
 }
 
-// Resources - Theme Colors
 fun seaCottageLightColors() = lightColorScheme(
     primary = SeaCottageSurf40,
     secondary = SeaCottageMint40,
@@ -139,14 +132,8 @@ fun StitchCounterV3Theme(
     }
 }
 
-/**
- * Extension property to access quaternary color via MaterialTheme
- */
 val MaterialTheme.quaternary: Color
     @Composable get() = LocalQuaternaryColor.current
 
-/**
- * Extension property to access onQuaternary color via MaterialTheme
- */
 val MaterialTheme.onQuaternary: Color
     @Composable get() = LocalOnQuaternaryColor.current

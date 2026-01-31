@@ -3,11 +3,11 @@ package com.example.stitchcounterv3.feature.singleCounter
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -17,32 +17,41 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.stitchcounterv3.domain.model.AdjustmentAmount
 import com.example.stitchcounterv3.domain.model.CounterState
-import com.example.stitchcounterv3.feature.sharedComposables.AdjustmentButtons
 import com.example.stitchcounterv3.feature.sharedComposables.BottomActionButtons
 import com.example.stitchcounterv3.feature.sharedComposables.CounterView
-import com.example.stitchcounterv3.feature.sharedComposables.IncreaseDecreaseButtons
-import com.example.stitchcounterv3.feature.sharedComposables.ResizableText
 import com.example.stitchcounterv3.ui.theme.StitchCounterV3Theme
 
 @Composable
 fun SingleCounterLandscapeLayout(
     state: SingleCounterUiState,
-    actions: SingleCounterActions
+    actions: SingleCounterActions,
+    topBarContent: (@Composable () -> Unit)? = null
 ) {
     Column(
         modifier = Modifier.fillMaxSize().padding(horizontal = 24.dp, vertical = 8.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        OutlinedTextField(
-            value = state.title,
-            onValueChange = actions::setTitle,
-            label = { Text("Project Name") },
-            modifier = Modifier.fillMaxWidth(),
-            isError = state.titleError != null,
-            supportingText = state.titleError?.let { { Text(it) } }
-        )
-
+        if (state.title.isNotEmpty() || topBarContent != null) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 8.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                if (state.title.isNotEmpty()) {
+                    Text(
+                        text = state.title,
+                        style = MaterialTheme.typography.titleLarge,
+                        modifier = Modifier.weight(1f)
+                    )
+                } else {
+                    Spacer(modifier = Modifier.weight(1f))
+                }
+                topBarContent?.invoke()
+            }
+        }
         CounterView(
             modifier = Modifier.weight(1f),
             count = state.counterState.count,
@@ -55,8 +64,7 @@ fun SingleCounterLandscapeLayout(
         )
 
         BottomActionButtons(
-            onResetAll = actions::resetCount,
-            onSave = actions::save
+            onResetAll = actions::resetCount
         )
     }
 }
@@ -67,17 +75,14 @@ private fun SingleCounterLandscapeScreenPreview() {
     StitchCounterV3Theme {
         Surface(modifier = Modifier.fillMaxSize()) {
             val fakeActions = object : SingleCounterActions {
-                override fun setTitle(title: String) {}
                 override fun increment() {}
                 override fun decrement() {}
                 override fun resetCount() {}
                 override fun changeAdjustment(value: AdjustmentAmount) {}
-                override fun save() {}
             }
             
             SingleCounterLandscapeLayout(
                 state = SingleCounterUiState(
-                    title = "Sample Project",
                     counterState = CounterState(
                         count = 42,
                         adjustment = AdjustmentAmount.FIVE

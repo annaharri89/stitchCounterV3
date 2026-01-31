@@ -17,13 +17,15 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 
 data class LibraryUiState(
     val isMultiSelectMode: Boolean = false,
     val selectedProjectIds: Set<Int> = emptySet(),
     val showDeleteConfirmation: Boolean = false,
-    val projectsToDelete: List<Project> = emptyList()
+    val projectsToDelete: List<Project> = emptyList(),
+    val isLoading: Boolean = true
 )
 
 @HiltViewModel
@@ -33,6 +35,11 @@ class LibraryViewModel @Inject constructor(
     private val deleteProjects: DeleteProjects,
 ) : ViewModel() {
     val projects: StateFlow<List<Project>> = observeProjects()
+        .onEach {
+            if (_uiState.value.isLoading) {
+                _uiState.value = _uiState.value.copy(isLoading = false)
+            }
+        }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
     private val _uiState = MutableStateFlow(LibraryUiState())

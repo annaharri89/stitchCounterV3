@@ -12,52 +12,40 @@ val PurpleGrey40 = Color(0xFF625b71)
 val Pink40 = Color(0xFF7D5260)
 val PurpleViolet40 = Color(0xFF4A2C3A)
 
-// Purple Theme - Primary Container
 val PurplePrimaryContainer80 = Color(0xFF4F378B)
 val PurplePrimaryContainer40 = Color(0xFFE8DEF8)
 
-// Sea Cottage Theme - Light (80)
-val SeaCottageMint80 = Color(0XFF77E4C8)//0x tells the compiler that this is a hexadecimal number. FF says 100% alpha and then the rest of it is the color
+val SeaCottageMint80 = Color(0XFF77E4C8)
 val SeaCottageSurf80 = Color(0XFF36C2CE)
 val SeaCottageWhaleLight80 = Color(0XFF478CCF)
 val SeaCottageWhaleDark80 = Color(0XFF4535C1)
 
-// Sea Cottage Theme - Dark (40)
-val SeaCottageMint40 = Color(0xFF3A9B8A) // Darker mint for dark theme
-val SeaCottageSurf40 = Color(0xFF1F8A9A) // Darker surf for dark theme
-val SeaCottageWhaleLight40 = Color(0xFF2A5A8A) // Darker whale light for dark theme
-val SeaCottageWhaleDark40 = Color(0xFF2A2F7A) // Darker whale dark for dark theme
+val SeaCottageMint40 = Color(0xFF3A9B8A)
+val SeaCottageSurf40 = Color(0xFF1F8A9A)
+val SeaCottageWhaleLight40 = Color(0xFF2A5A8A)
+val SeaCottageWhaleDark40 = Color(0xFF2A2F7A)
 
-// Sea Cottage Theme - Primary Container (lighter versions of navy blue SeaCottageWhaleDark)
-val SeaCottagePrimaryContainer80 = Color(0xFF6B7BC7) // Lighter navy blue for dark theme
-val SeaCottagePrimaryContainer40 = Color(0xFFE8E9FF) // Very light navy blue for light theme
+val SeaCottagePrimaryContainer80 = Color(0xFF6B7BC7)
+val SeaCottagePrimaryContainer40 = Color(0xFFE8E9FF)
 
-
-// Retro Summer Theme - Light (80)
 val RetroSummerCactus80 = Color(0XFF36BA98)
 val RetroSummerSun80 = Color(0XFFE9C46A)
 val RetroSummerOrangeLight80 = Color(0XFFF4A261)
 val RetroSummerOrangeDark80 = Color(0XFFE76F51)
 
-// Retro Summer Theme - Dark (40)
-val RetroSummerCactus40 = Color(0xFF2A7B5A) // Darker cactus for dark theme
-val RetroSummerSun40 = Color(0xFF9B7A2A) // Darker sun for dark theme
-val RetroSummerOrangeLight40 = Color(0xFFC86A2A) // Darker orange light for dark theme
-val RetroSummerOrangeDark40 = Color(0xFF9B4A2A) // Darker orange dark for dark theme
+val RetroSummerCactus40 = Color(0xFF2A7B5A)
+val RetroSummerSun40 = Color(0xFF9B7A2A)
+val RetroSummerOrangeLight40 = Color(0xFFC86A2A)
+val RetroSummerOrangeDark40 = Color(0xFF9B4A2A)
 
-// Retro Summer Theme - Primary Container (lighter versions of RetroSummerOrangeDark)
-val RetroSummerPrimaryContainer80 = Color(0xFFC47A5A) // Balanced orange-red for dark theme
-val RetroSummerPrimaryContainer40 = Color(0xFFFFF4F0) // Very light orange-red for light theme
+val RetroSummerPrimaryContainer80 = Color(0xFFC47A5A)
+val RetroSummerPrimaryContainer40 = Color(0xFFFFF4F0)
 
-// Error Colors - Theme-specific error colors that match each theme's aesthetic
-// Sea Cottage Theme - Error (coral/red-orange that complements ocean theme)
-val SeaCottageError80 = Color(0xFFFF6B6B) // Light coral-red for dark theme
-val SeaCottageError40 = Color(0xFFD32F2F) // Darker coral-red for light theme
+val SeaCottageError80 = Color(0xFFFF6B6B)
+val SeaCottageError40 = Color(0xFFD32F2F)
 
-// Retro Summer Theme - Error (red-orange that matches warm theme)
-val RetroSummerError80 = Color(0xFFFF5252) // Light red-orange for dark theme
-val RetroSummerError40 = Color(0xFFC62828) // Darker red-orange for light theme
+val RetroSummerError80 = Color(0xFFFF5252)
+val RetroSummerError40 = Color(0xFFC62828)
 
-// Purple Theme - Error (red-pink that complements purple theme)
-val PurpleError80 = Color(0xFFFF6B9D) // Light red-pink for dark theme
-val PurpleError40 = Color(0xFFC2185B) // Darker red-pink for light theme
+val PurpleError80 = Color(0xFFFF6B9D)
+val PurpleError40 = Color(0xFFC2185B)

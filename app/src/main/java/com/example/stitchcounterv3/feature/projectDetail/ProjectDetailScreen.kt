@@ -11,8 +11,10 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.AddPhotoAlternate
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -23,11 +25,22 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.activity.compose.BackHandler
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
+import com.example.stitchcounterv3.domain.model.ProjectType
 import com.example.stitchcounterv3.feature.navigation.RootNavGraph
+import com.example.stitchcounterv3.feature.sharedComposables.RowProgressIndicator
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import java.io.File
@@ -42,7 +55,8 @@ fun ProjectDetailContent(
     showDiscardDialog: Boolean,
     onDismissDiscardDialog: () -> Unit,
     onDiscard: () -> Unit,
-    onCreateProject: (() -> Unit)?
+    onCreateProject: (() -> Unit)?,
+    onNavigateBack: ((Int) -> Unit)?
 ) {
     val imagePickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
@@ -55,51 +69,115 @@ fun ProjectDetailContent(
         }
     }
 
+    val scrollState = rememberScrollState()
+    val isNewProject = uiState.project?.id == null || uiState.project.id == 0
+    val isDoubleCounter = uiState.projectType == ProjectType.DOUBLE
+    val keyboardController = LocalSoftwareKeyboardController.current
+    val totalRowsFocusRequester = remember { FocusRequester() }
+    val projectNotCreated = onCreateProject != null && isNewProject
+
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(24.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
+            .padding(24.dp)
     ) {
-
-        val isNewProject = uiState.project?.id == null || uiState.project.id == 0
-
-        ProjectDetailTopBar(isNewProject)
-
-        OutlinedTextField(
-            value = uiState.title,
-            onValueChange = { viewModel.updateTitle(it) },
-            label = { Text("Project Title") },
-            modifier = Modifier.fillMaxWidth(),
-            singleLine = true,
-            placeholder = { Text("Enter project title") },
-            isError = uiState.titleError != null,
-            supportingText = uiState.titleError?.let { { Text(it) } }
-        )
-
-        ProjectImageSelector(
-            imagePath = uiState.imagePath,
-            onImageClick = { imagePickerLauncher.launch("image/*") },
-            onRemoveImage = { viewModel.updateImagePath(null) },
-            modifier = Modifier.fillMaxWidth()
-        )
-
-        if (uiState.isLoading) {
-            CircularProgressIndicator(
-                modifier = Modifier
-                    .align(Alignment.CenterHorizontally)
-                    .padding(16.dp)
+        Column(
+            modifier = Modifier
+                .weight(1f)
+                .verticalScroll(scrollState),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            ProjectDetailTopBar(
+                isNewProject = isNewProject,
+                onCloseClick = if (isNewProject) { { viewModel.attemptDismissal() } } else null,
+                onBackClick = if (!isNewProject && uiState.project?.id != null && onNavigateBack != null) {
+                    { onNavigateBack(uiState.project.id) }
+                } else null
             )
+
+            OutlinedTextField(
+                value = uiState.title,
+                onValueChange = { viewModel.updateTitle(it) },
+                label = { Text("Project Title") },
+                modifier = Modifier.fillMaxWidth(),
+                singleLine = true,
+                placeholder = { Text("Enter project title") },
+                isError = uiState.titleError != null,
+                supportingText = uiState.titleError?.let { { Text(it) } },
+                keyboardOptions = KeyboardOptions(
+                    imeAction = if (isDoubleCounter) ImeAction.Next else ImeAction.Done
+                ),
+                keyboardActions = KeyboardActions(
+                    onNext = {
+                        if (isDoubleCounter) {
+                            totalRowsFocusRequester.requestFocus()
+                        }
+                    },
+                    onDone = {
+                        keyboardController?.hide()
+                    }
+                )
+            )
+
+            if (isDoubleCounter) {
+                OutlinedTextField(
+                    value = uiState.totalRows,
+                    onValueChange = { viewModel.updateTotalRows(it) },
+                    label = { Text("Total Rows") },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .focusRequester(totalRowsFocusRequester),
+                    singleLine = true,
+                    placeholder = { Text("Enter total rows") },
+                    keyboardOptions = KeyboardOptions(
+                        imeAction = ImeAction.Done,
+                        keyboardType = KeyboardType.Number
+                    ),
+                    keyboardActions = KeyboardActions(
+                        onDone = {
+                            keyboardController?.hide()
+                        }
+                    )
+                )
+                
+                val rowProgress: Float? = uiState.project?.let { project ->
+                    val totalRowsValue = project.totalRows
+                    if (totalRowsValue > 0) {
+                        (project.rowCounterNumber.toFloat() / totalRowsValue.toFloat()).coerceIn(0f, 1f)
+                    } else {
+                        null
+                    }
+                }
+                
+                RowProgressIndicator(
+                    progress = rowProgress,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
+
+            ProjectImageSelector(
+                imagePath = uiState.imagePath,
+                onImageClick = { imagePickerLauncher.launch("image/*") },
+                onRemoveImage = { viewModel.updateImagePath(null) },
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            if (uiState.isLoading) {
+                CircularProgressIndicator(
+                    modifier = Modifier
+                        .align(Alignment.CenterHorizontally)
+                        .padding(16.dp)
+                )
+            }
         }
-
-        Spacer(modifier = Modifier.weight(1f))
-
-        val projectNotCreated = onCreateProject != null && uiState.project?.id != null && uiState.project.id > 0
 
         if (projectNotCreated) {
             Button(
                 onClick = onCreateProject,
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .imePadding(),
+                enabled = uiState.title.isNotBlank()
             ) {
                 Text("Create Project")
             }
@@ -318,20 +396,47 @@ fun ProjectDetailScreen(
             showDiscardDialog = false
             navigator.popBackStack()
         },
-        onCreateProject = null
+        onCreateProject = null,
+        onNavigateBack = null
     )
 }
 
 @Composable
-private fun ProjectDetailTopBar(isNewProject: Boolean) {
-    Row {
+private fun ProjectDetailTopBar(
+    isNewProject: Boolean,
+    onCloseClick: (() -> Unit)?,
+    onBackClick: (() -> Unit)?
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        if (onBackClick != null) {
+            IconButton(onClick = onBackClick) {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                    contentDescription = "Back"
+                )
+            }
+        } else {
+            Spacer(modifier = Modifier.size(48.dp))
+        }
+        
         Text(
-            text = if (isNewProject) {
-                "New Project"
-            } else {
-                "Project Details"
-            },
+            text = "Project Details",
             style = MaterialTheme.typography.headlineMedium
         )
+        
+        if (onCloseClick != null) {
+            IconButton(onClick = onCloseClick) {
+                Icon(
+                    imageVector = Icons.Default.Close,
+                    contentDescription = "Close"
+                )
+            }
+        } else {
+            Spacer(modifier = Modifier.size(48.dp))
+        }
     }
 }

@@ -14,12 +14,6 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-/**
- * Settings screen ViewModel that manages theme selection and displays color information.
- * 
- * Flow: User taps theme → onThemeSelected() → DataStore saves → 
- * observeTheme() updates UI → SettingsScreen shows new selection
- */
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
     private val themePreferencesRepository: ThemePreferencesRepository,
@@ -33,9 +27,6 @@ class SettingsViewModel @Inject constructor(
         observeTheme()
     }
 
-    /**
-     * Observes theme changes and updates UI with current theme + color information
-     */
     private fun observeTheme() {
         viewModelScope.launch {
             themePreferencesRepository.selectedTheme.collect { theme ->
@@ -49,9 +40,6 @@ class SettingsViewModel @Inject constructor(
         }
     }
 
-    /**
-     * Handles theme selection from UI - saves to DataStore
-     */
     fun onThemeSelected(theme: AppTheme) {
         viewModelScope.launch {
             themePreferencesRepository.setTheme(theme)
