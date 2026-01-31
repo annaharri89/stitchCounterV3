@@ -46,6 +46,7 @@ class SettingsViewModel @Inject constructor(
         viewModelScope.launch {
             themePreferencesRepository.setTheme(theme)
             launcherIconManager.updateLauncherIcon(theme)
+            themePreferencesRepository.setShouldNavigateToSettings(true)
         }
     }
 }
